@@ -50,6 +50,7 @@
     "@graphql-codegen/typescript": "2.8.5",
     "@graphql-codegen/typescript-resolvers": "2.7.10",
     "@types/crypto-js": "^4.1.1",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^18.11.17",
     "@types/nodemailer": "^6.4.7",
     "@types/nodemailer-smtp-transport": "^2.7.5",
