@@ -13,7 +13,7 @@ export class AuthTokenModel {
 
   public static async findByAccountId(accountId: string) {
     // eslint-disable-next-line no-return-await, no-underscore-dangle
-    const _authToken = await prisma.authToken.findUnique({
+    const _authToken = await prisma.adminAuthToken.findUnique({
       where: {
         account_id: accountId,
       },
@@ -33,7 +33,7 @@ export class AuthTokenModel {
   }
 
   public static async deleteByAccountId(accountId: string) {
-    await prisma.authToken.delete({
+    await prisma.adminAuthToken.delete({
       where: {
         account_id: accountId,
       },
@@ -41,7 +41,7 @@ export class AuthTokenModel {
   }
 
   public static async deleteById(id: string) {
-    await prisma.authToken.delete({
+    await prisma.adminAuthToken.delete({
       where: {
         id,
       },
@@ -54,7 +54,7 @@ export class AuthTokenModel {
       await AuthTokenModel.deleteById(existing.props.id)
     }
     // eslint-disable-next-line no-return-await, no-underscore-dangle
-    const _authToken = await prisma.authToken.create({
+    const _authToken = await prisma.adminAuthToken.create({
       data: {
         access_token: this.props.access_token,
         refresh_token: this.props.refresh_token,

@@ -16,7 +16,7 @@ export default class ConcertCategory {
 
   public async create() {
     const { title } = this
-    const created = await prisma.concertCategory.create({
+    const created = await prisma.adminConcertCategory.create({
       data: {
         title,
       },
@@ -25,7 +25,7 @@ export default class ConcertCategory {
   }
 
   public static async find(id: number) {
-    const concertCategory = await prisma.concertCategory.findUnique({
+    const concertCategory = await prisma.adminConcertCategory.findUnique({
       where: {
         id,
       },
@@ -34,7 +34,7 @@ export default class ConcertCategory {
   }
 
   public static async listAll() {
-    const list = await prisma.concertCategory.findMany({})
+    const list = await prisma.adminConcertCategory.findMany({})
     return list
   }
 }

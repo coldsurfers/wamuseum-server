@@ -76,7 +76,7 @@ class Concert {
   }
 
   public static async find(id: string) {
-    const concert = await prisma.concert.findUnique({
+    const concert = await prisma.adminConcert.findUnique({
       where: {
         id,
       },
@@ -104,7 +104,7 @@ class Concert {
       createdAt?: 'asc' | 'desc'
     }
   }) {
-    const list = await prisma.concert.findMany({
+    const list = await prisma.adminConcert.findMany({
       include: {
         posters: true,
         tickets: {
@@ -122,7 +122,7 @@ class Concert {
   }
 
   public static async count() {
-    const count = await prisma.concert.count()
+    const count = await prisma.adminConcert.count()
     return count
   }
 
@@ -136,7 +136,7 @@ class Concert {
       concertCategoryId,
       location,
     } = this
-    const concert = await prisma.concert.create({
+    const concert = await prisma.adminConcert.create({
       data: {
         concertCategory: {
           connect: {
@@ -201,7 +201,7 @@ class Concert {
       concertCategoryId,
       location,
     } = this
-    const updated = await prisma.concert.update({
+    const updated = await prisma.adminConcert.update({
       data: {
         concertCategory: {
           connect: {
@@ -267,7 +267,7 @@ class Concert {
   }
 
   public static async remove(id: string) {
-    const deleted = await prisma.concert.delete({
+    const deleted = await prisma.adminConcert.delete({
       where: {
         id,
       },

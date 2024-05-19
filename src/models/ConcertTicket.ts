@@ -52,7 +52,7 @@ class ConcertTicket {
 
   public async create(concertId: string) {
     const { openDate, seller, sellingURL, ticketPrices } = this
-    const created = await prisma.concertTicket.create({
+    const created = await prisma.adminConcertTicket.create({
       data: {
         openDate,
         seller,
@@ -84,7 +84,7 @@ class ConcertTicket {
     >
   ) {
     const { ticketPrices } = params
-    const updated = await prisma.concertTicket.update({
+    const updated = await prisma.adminConcertTicket.update({
       data: {
         openDate: params.openDate,
         seller: params.seller,
