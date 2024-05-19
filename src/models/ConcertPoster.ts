@@ -21,7 +21,7 @@ class ConcertPoster {
 
   public async create() {
     if (!this.concertId) return null
-    const created = await prisma.concertPoster.create({
+    const created = await prisma.adminConcertPoster.create({
       data: {
         concertId: this.concertId,
         imageURL: this.imageURL,
@@ -40,7 +40,7 @@ class ConcertPoster {
     id: string,
     params: Partial<Pick<ConcertPoster, 'imageURL'>>
   ) {
-    const updated = await prisma.concertPoster.update({
+    const updated = await prisma.adminConcertPoster.update({
       data: params,
       where: {
         id,

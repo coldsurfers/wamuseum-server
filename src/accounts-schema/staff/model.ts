@@ -9,7 +9,7 @@ export class StaffModel {
   }
 
   public async create(): Promise<StaffModel> {
-    const created = await prisma.staff.create({
+    const created = await prisma.adminStaff.create({
       data: {
         ...this.props,
       },
@@ -23,7 +23,7 @@ export class StaffModel {
   public static async findByStaffId(
     staffId: string
   ): Promise<StaffModel | null> {
-    const found = await prisma.staff.findUnique({
+    const found = await prisma.adminStaff.findUnique({
       where: {
         id: staffId,
       },
@@ -37,7 +37,7 @@ export class StaffModel {
   public static async findByAccountId(
     accountId: string
   ): Promise<StaffModel | null> {
-    const staff = await prisma.staff.findUnique({
+    const staff = await prisma.adminStaff.findUnique({
       where: {
         account_id: accountId,
       },
@@ -57,7 +57,7 @@ export class StaffModel {
     skip: number
     take: number
   }): Promise<StaffModel[]> {
-    const list = await prisma.staff.findMany({
+    const list = await prisma.adminStaff.findMany({
       skip,
       take,
     })
@@ -71,7 +71,7 @@ export class StaffModel {
   }
 
   public static async authorizeByStaffId(staffId: string): Promise<StaffModel> {
-    const staff = await prisma.staff.update({
+    const staff = await prisma.adminStaff.update({
       where: {
         id: staffId,
       },

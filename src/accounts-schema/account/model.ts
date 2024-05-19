@@ -34,7 +34,7 @@ export class AccountModel {
   }
 
   public static async findByAccessToken(accessToken: string) {
-    const authToken = await prisma.authToken.findFirst({
+    const authToken = await prisma.adminAuthToken.findFirst({
       where: {
         access_token: accessToken,
       },
@@ -42,7 +42,7 @@ export class AccountModel {
     if (!authToken) return null
 
     // eslint-disable-next-line no-underscore-dangle
-    const _account = await prisma.account.findUnique({
+    const _account = await prisma.adminAccount.findUnique({
       where: {
         id: authToken.account_id,
       },
@@ -69,7 +69,7 @@ export class AccountModel {
 
   public static async findById(id: string) {
     // eslint-disable-next-line no-underscore-dangle
-    const _account = await prisma.account.findUnique({
+    const _account = await prisma.adminAccount.findUnique({
       where: {
         id,
       },
@@ -96,7 +96,7 @@ export class AccountModel {
 
   public static async findByEmail(email: string) {
     // eslint-disable-next-line no-underscore-dangle
-    const _user = await prisma.account.findUnique({
+    const _user = await prisma.adminAccount.findUnique({
       where: {
         email,
       },
@@ -128,14 +128,14 @@ export class AccountModel {
     totalCount: number
   }> {
     const [list, totalCount] = await prisma.$transaction([
-      prisma.account.findMany({
+      prisma.adminAccount.findMany({
         include: {
           staff: includeStaff,
         },
         skip,
         take,
       }),
-      prisma.account.count(),
+      prisma.adminAccount.count(),
     ])
 
     const accountList = list.map(
@@ -157,7 +157,7 @@ export class AccountModel {
   }
 
   public async create(): Promise<AccountModel> {
-    const created = await prisma.account.create({
+    const created = await prisma.adminAccount.create({
       data: {
         ...this.props,
         staff: {
@@ -186,7 +186,7 @@ export class AccountModel {
     userId: string
     email: string
   }) {
-    const updated = await prisma.account.update({
+    const updated = await prisma.adminAccount.update({
       where: {
         id: userId,
       },
@@ -215,7 +215,7 @@ export class AccountModel {
     password: string
     passwordSalt: string
   }) {
-    const updated = await prisma.account.update({
+    const updated = await prisma.adminAccount.update({
       where: {
         id: userId,
       },
