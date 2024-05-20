@@ -16,8 +16,8 @@
     "lint": "eslint --cache \"src/**/*.{js,jsx,ts,tsx}\" \"vercel/**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "yarn lint --fix",
     "prepare": "husky install",
-    "prisma:db-push": "yarn prisma db push --schema ./prisma/schema.prisma",
-    "prisma:generate": "yarn prisma generate --schema ./prisma/schema.prisma",
+    "prisma:db-push": "yarn prisma db push --schema ./node_modules/@coldsurfers/prisma-schema/prisma/schema.prisma",
+    "prisma:generate": "yarn prisma generate --schema ./node_modules/@coldsurfers/prisma-schema/prisma/schema.prisma",
     "start": "node --experimental-specifier-resolution=node ./dist/index.js",
     "vercel:sync-env": "vercel env pull"
   },
@@ -26,6 +26,7 @@
     "@as-integrations/fastify": "^2.1.1",
     "@aws-sdk/client-s3": "^3.254.0",
     "@aws-sdk/s3-presigned-post": "^3.254.0",
+    "@coldsurfers/prisma-schema": "^0.2.0",
     "@fastify/cors": "^9.0.1",
     "@prisma/client": "5.8.0",
     "@vercel/node": "^2.8.2",

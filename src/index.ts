@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@coldsurfers/prisma-schema'
 
 export const prisma = new PrismaClient()
 
