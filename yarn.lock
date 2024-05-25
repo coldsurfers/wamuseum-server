@@ -1284,10 +1284,10 @@
     "@babel/helper-validator-identifier" "^7.24.5"
     to-fast-properties "^2.0.0"
 
-"@coldsurfers/prisma-schema@^0.2.0":
-  version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@coldsurfers/prisma-schema/0.2.0/4bd360c2802ada39a0ba5ffc48c0bf3df3d3f2c7#4bd360c2802ada39a0ba5ffc48c0bf3df3d3f2c7"
-  integrity sha512-mO4gWf+xrTdTPOwDWFTk73sZKHmJzByJQYw/GoCH25vxzEORD6y3ejtZvJ0aOgCWdjqc9gAKEqmKjnWhlYOIqQ==
+"@coldsurfers/prisma-schema@^0.2.1-rc.1":
+  version "0.2.1-rc.1"
+  resolved "https://npm.pkg.github.com/download/@coldsurfers/prisma-schema/0.2.1-rc.1/340234085e7cd0baa9938a9a485f9f23c5acbdc5#340234085e7cd0baa9938a9a485f9f23c5acbdc5"
+  integrity sha512-pCrhRHAMZqe6A5EQ+ez2zQT6DTkUfi68PIiMKxh5W+dQB7k4M9yC435x8ORlsR/uEMuccds15zznjsETsLW5Xg==
 
 "@commitlint/cli@^17.3.0":
   version "17.8.1"
