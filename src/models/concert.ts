@@ -2,7 +2,7 @@ import { type Concert as PrismaConcert } from '@coldsurfers/prisma-schema'
 import { prisma } from '..'
 
 class ConcertModel {
-  public prismaModel: PrismaConcert
+  private prismaModel: PrismaConcert
 
   constructor(concert: PrismaConcert) {
     this.prismaModel = concert

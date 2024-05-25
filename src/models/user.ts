@@ -2,7 +2,7 @@ import { type User as PrismaUser } from '@coldsurfers/prisma-schema'
 import { prisma } from '../accounts-schema/libs/prismaClient'
 
 export class UserModel {
-  public prismaModel: PrismaUser
+  private prismaModel: PrismaUser
 
   constructor(user: PrismaUser) {
     this.prismaModel = user
