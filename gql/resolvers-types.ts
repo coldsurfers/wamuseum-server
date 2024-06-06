@@ -143,6 +143,7 @@ export type CreateUserInput = {
 
 export type EmailAuthRequest = {
   __typename?: 'EmailAuthRequest';
+  authcode: Scalars['String'];
   authenticated?: Maybe<Scalars['Boolean']>;
   createdAt: Scalars['String'];
   email: Scalars['String'];
@@ -267,7 +268,7 @@ export type QueryConcertListArgs = {
 
 
 export type QueryUserArgs = {
-  id: Scalars['String'];
+  id: Scalars['Int'];
 };
 
 export type RemoveConcertData = HttpError | RemovedConcert;
@@ -314,8 +315,10 @@ export type User = {
   __typename?: 'User';
   createdAt?: Maybe<Scalars['String']>;
   email: Scalars['String'];
-  id: Scalars['String'];
+  id: Scalars['Int'];
   isAdmin?: Maybe<Scalars['Boolean']>;
+  password?: Maybe<Scalars['String']>;
+  passwordSalt?: Maybe<Scalars['String']>;
 };
 
 export type UserData = HttpError | User;
@@ -589,6 +592,7 @@ export type CreateUserDataResolvers<ContextType = GraphqlContext, ParentType ext
 };
 
 export type EmailAuthRequestResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['EmailAuthRequest'] = ResolversParentTypes['EmailAuthRequest']> = {
+  authcode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   authenticated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -659,8 +663,10 @@ export type UpdateConcertTicketDataResolvers<ContextType = GraphqlContext, Paren
 export type UserResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   isAdmin?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  password?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  passwordSalt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

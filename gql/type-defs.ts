@@ -1,9 +1,11 @@
 const typeDefs = `#graphql
   type User {
-    id: String!
+    id: Int!
     email: String!
     isAdmin: Boolean
     createdAt: String
+    password: String
+    passwordSalt: String
   }
 
   type UserWithToken {
@@ -16,6 +18,7 @@ const typeDefs = `#graphql
     email: String!
     authenticated: Boolean
     createdAt: String!
+    authcode: String!
   }
 
   type ConcertCategory {
@@ -197,7 +200,7 @@ const typeDefs = `#graphql
   type Query {
     me: UserData
     user(
-      id: String!
+      id: Int!
     ): UserData
     concertList(
       page: Int!

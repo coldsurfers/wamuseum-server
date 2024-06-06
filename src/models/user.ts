@@ -1,5 +1,9 @@
-import { type User as PrismaUser } from '@coldsurfers/prisma-schema'
-import { prisma } from '../accounts-schema/libs/prismaClient'
+import {
+  PrismaClient,
+  type User as PrismaUser,
+} from '@coldsurfers/prisma-schema'
+
+const prisma = new PrismaClient()
 
 export class UserModel {
   private prismaModel: PrismaUser
@@ -15,6 +19,18 @@ export class UserModel {
       },
       include: {
         staff: true,
+      },
+    })
+
+    return user ? new UserModel(user) : null
+  }
+
+  public static async findByAccessToken(accessToken: string) {
+    const user = await prisma.user.findFirst({
+      where: {
+        auth_token: {
+          access_token: accessToken,
+        },
       },
     })
 
@@ -56,5 +72,25 @@ export class UserModel {
     })
 
     return new UserModel(user)
+  }
+
+  get id(): number {
+    return this.prismaModel.id
+  }
+
+  get email(): string {
+    return this.prismaModel.email
+  }
+
+  get password(): string | null {
+    return this.prismaModel.password
+  }
+
+  get passwordSalt(): string | null {
+    return this.prismaModel.passwordSalt
+  }
+
+  get createdAt(): Date {
+    return this.prismaModel.createdAt
   }
 }

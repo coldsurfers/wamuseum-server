@@ -11,10 +11,7 @@ const handler: VercelApiHandler = async (
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   } else {
     // todo: add white list url of cors
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      'https://billets-admin.coldsurf.io'
-    )
+    res.setHeader('Access-Control-Allow-Origin', 'https://coldsurf.io')
   }
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
