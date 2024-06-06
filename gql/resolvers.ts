@@ -266,7 +266,14 @@ const resolvers: Resolvers = {
       await sendEmail({
         to: createdEmailAuthRequest.email,
         subject: 'Billets 이메일 인증 번호',
-        text: `Billets의 이메일 인증 번호는 ${createdEmailAuthRequest.authcode}입니다. 3분내에 입력 해 주세요.`,
+        html: `Billets의 이메일 인증 번호는 ${createdEmailAuthRequest.authcode}입니다. 3분내에 입력 해 주세요.`,
+        smtpOptions: {
+          service: process.env.MAILER_SERVICE,
+          auth: {
+            user: process.env.MAILER_EMAIL_ADDRESS,
+            pass: process.env.MAILER_EMAIL_APP_PASSWORD,
+          },
+        },
       })
       return createdEmailAuthRequest
     },

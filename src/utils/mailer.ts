@@ -1,28 +1,22 @@
 import mailer from 'nodemailer'
-import smtpTransport from 'nodemailer-smtp-transport'
+import smtpTransport, { SmtpOptions } from 'nodemailer-smtp-transport'
 import Mail from 'nodemailer/lib/mailer'
 
-// eslint-disable-next-line import/prefer-default-export
 export async function sendEmail({
   to,
-  text,
+  from,
+  html,
   subject,
-}: Pick<Mail.Options, 'to' | 'text' | 'subject'>) {
-  const { MAILER_EMAIL_ADDRESS, MAILER_EMAIL_APP_PASSWORD } = process.env
-  const transport = mailer.createTransport(
-    smtpTransport({
-      service: 'Gmail',
-      auth: {
-        user: MAILER_EMAIL_ADDRESS,
-        pass: MAILER_EMAIL_APP_PASSWORD,
-      },
-    })
-  )
+  smtpOptions,
+}: Pick<Mail.Options, 'to' | 'html' | 'subject' | 'from'> & {
+  smtpOptions: SmtpOptions
+}) {
+  const transport = mailer.createTransport(smtpTransport(smtpOptions))
   const mailOptions: Mail.Options = {
-    from: MAILER_EMAIL_ADDRESS,
+    from,
     to,
     subject, // 이메일 제목
-    text, // 이메일 내용
+    html,
   }
   const sendEmailPromise = () =>
     new Promise((resolve, reject) => {
