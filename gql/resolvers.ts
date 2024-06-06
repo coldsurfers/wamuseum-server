@@ -1,23 +1,42 @@
 import { isAfter, addMinutes } from 'date-fns'
 import { GraphQLError } from 'graphql'
-import { AccountModel } from '../src/accounts-schema'
+import {
+  ConcertPosterService,
+  EmailAuthRequestService,
+  ConcertTicketService,
+  ConcertCategoryService,
+  UserService,
+  StaffService,
+  ConcertService,
+} from '../src/services'
 import { Resolvers } from './resolvers-types'
-import Concert from '../src/models/Concert'
-import ConcertTicket from '../src/models/ConcertTicket'
-import ConcertPoster from '../src/models/ConcertPoster'
-import EmailAuthRequest from '../src/models/EmailAuthRequest'
 import { sendEmail } from '../src/utils/mailer'
 import { validateCreateUser } from '../src/utils/validate'
 import encryptPassword from '../src/utils/encryptPassword'
 import { generateToken } from '../src/utils/generateToken'
-import ConcertCategory from '../src/models/ConcertCategory'
 
 const resolvers: Resolvers = {
   Query: {
     me: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      const isStaff = user?.staff?.is_staff
-      if (!user || !user.id || !isStaff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { isAuthorized: isAuthorizedStaff } = staff
+      if (!isAuthorizedStaff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -31,15 +50,24 @@ const resolvers: Resolvers = {
       }
     },
     user: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
           },
         })
       }
-      const searchedUser = await AccountModel.findById(args.id)
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const searchedUser = await UserService.getUserById(args.id)
       if (!searchedUser || !searchedUser.id) {
         return {
           __typename: 'HttpError',
@@ -47,18 +75,20 @@ const resolvers: Resolvers = {
           message: '해당 유저가 존재하지 않습니다.',
         }
       }
-      return {
-        id: searchedUser.id,
-        email: searchedUser.email,
-        createdAt: searchedUser.created_at
-          ? searchedUser.created_at.toISOString()
-          : null,
-        __typename: 'User',
-      }
+      return searchedUser
     },
     concertCategory: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -66,7 +96,8 @@ const resolvers: Resolvers = {
         })
       }
 
-      const concertCategory = await ConcertCategory.find(args.id)
+      const concertCategory =
+        await ConcertCategoryService.getConcertCategoryById(args.id)
       if (!concertCategory) {
         return {
           __typename: 'HttpError',
@@ -74,21 +105,27 @@ const resolvers: Resolvers = {
           message: '해당하는 콘서트 카테고리가 없습니다.',
         }
       }
-      return {
-        ...concertCategory,
-        __typename: 'ConcertCategory',
-      }
+      return concertCategory
     },
     concertCategoryList: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
           },
         })
       }
-      const list = await ConcertCategory.listAll()
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const list = await ConcertCategoryService.getAllConcertCategories()
       return {
         list,
         __typename: 'ConcertCategoryList',
@@ -96,37 +133,36 @@ const resolvers: Resolvers = {
     },
     concertList: async (parent, args, ctx) => {
       const { page, limit, orderBy } = args
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
           },
         })
       }
-      const concerts = await Concert.list({
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const concerts = await ConcertService.getList({
         page,
         limit,
         orderBy: {
           createdAt: orderBy.createdAt as 'asc' | 'desc',
         },
       })
-      const count = await Concert.count()
-      const list = concerts.map((item) => ({
-        ...item,
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt ? item.updatedAt.toISOString() : undefined,
-        date: item.date ? item.date.toISOString() : null,
-        tickets: item.tickets.map((ticket) => ({
-          ...ticket,
-          openDate: ticket.openDate.toISOString(),
-        })),
-      }))
+      const count = await ConcertService.getAllCount()
       return {
         __typename: 'ConcertListWithPagination',
         list: {
           __typename: 'ConcertList',
-          list,
+          list: concerts,
         },
         pagination: {
           __typename: 'Pagination',
@@ -136,34 +172,33 @@ const resolvers: Resolvers = {
       }
     },
     concert: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
           },
         })
       }
-      const concert = await Concert.find(args.id)
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const concert = await ConcertService.getConcertById(args.id)
+
       if (!concert)
         return {
           __typename: 'HttpError',
           code: 404,
           message: '콘서트가 존재하지 않습니다.',
         }
-      return {
-        ...concert,
-        createdAt: concert.createdAt.toISOString(),
-        updatedAt: concert.updatedAt
-          ? concert.updatedAt.toISOString()
-          : undefined,
-        date: concert.date ? concert.date.toISOString() : null,
-        tickets: concert.tickets.map((ticket) => ({
-          ...ticket,
-          openDate: ticket.openDate.toISOString(),
-        })),
-        __typename: 'Concert',
-      }
+
+      return concert
     },
   },
   Mutation: {
@@ -199,7 +234,8 @@ const resolvers: Resolvers = {
           }
         }
       }
-      const existing = await AccountModel.findByEmail(email)
+
+      const existing = await UserService.getUserByEmail(email)
       if (existing) {
         return {
           __typename: 'HttpError',
@@ -207,58 +243,56 @@ const resolvers: Resolvers = {
           message: '이미 가입이 완료 된 이메일입니다',
         }
       }
-      const user = new AccountModel({
-        ...args.input,
+      const createdUser = await UserService.createUser({
+        email: args.input.email,
+        password: args.input.password,
+        passwordSalt: '',
+        provider: '',
       })
-      const created = await user.create()
-      if (!created.id) {
+      if (!createdUser.id) {
         return {
           __typename: 'HttpError',
           code: 500,
           message: 'created.id is not existing',
         }
       }
-      return {
-        __typename: 'User',
-        id: created.id,
-        email: created.email,
-        createdAt: created.created_at ? created.created_at.toISOString() : null,
-      }
+      return createdUser
     },
     createEmailAuthRequest: async (parent, args) => {
       const { email } = args.input
-      const emailAuthRequest = new EmailAuthRequest({
+      const createdEmailAuthRequest = await EmailAuthRequestService.create({
         email,
       })
-      const created = await emailAuthRequest.create()
       await sendEmail({
-        to: created.email,
+        to: createdEmailAuthRequest.email,
         subject: 'Billets 이메일 인증 번호',
-        text: `Billets의 이메일 인증 번호는 ${created.authcode}입니다. 3분내에 입력 해 주세요.`,
+        text: `Billets의 이메일 인증 번호는 ${createdEmailAuthRequest.authcode}입니다. 3분내에 입력 해 주세요.`,
       })
-      return {
-        ...created,
-        createdAt: created.createdAt.toISOString(),
-      }
+      return createdEmailAuthRequest
     },
     authenticateEmailAuthRequest: async (parent, args) => {
       const { email, authcode } = args.input
-      const lastOne = await EmailAuthRequest.getLastOne(email)
-      if (!lastOne) {
+      const latest = await EmailAuthRequestService.getLatestByEmail(email)
+      if (!latest) {
         return {
           __typename: 'HttpError',
           code: 404,
           message: '이메일 인증 요청을 다시 시도해주세요.',
         }
       }
-      if (lastOne.authenticated) {
+      if (latest.authenticated) {
         return {
           __typename: 'HttpError',
           code: 409,
           message: '이미 인증 되었습니다.',
         }
       }
-      if (isAfter(lastOne.createdAt, addMinutes(lastOne.createdAt, 3))) {
+      if (
+        isAfter(
+          new Date(latest.createdAt),
+          addMinutes(new Date(latest.createdAt), 3)
+        )
+      ) {
         return {
           __typename: 'HttpError',
           code: 410,
@@ -266,15 +300,12 @@ const resolvers: Resolvers = {
         }
       }
 
-      if (authcode === lastOne.authcode) {
-        const result = await EmailAuthRequest.update(lastOne.id, {
-          authenticated: true,
-        })
-        return {
-          ...result,
-          createdAt: result.createdAt.toISOString(),
-          __typename: 'EmailAuthRequest',
-        }
+      if (authcode === latest.authcode) {
+        const result = await EmailAuthRequestService.updateAuthenticatedById(
+          latest.id,
+          true
+        )
+        return result
       }
 
       return {
@@ -285,24 +316,26 @@ const resolvers: Resolvers = {
     },
     login: async (parent, args) => {
       const { email, password } = args.input
-      const user = await AccountModel.findByEmail(email)
+      const user = await UserService.getUserByEmail(email)
       if (!user) {
-        return {
-          __typename: 'HttpError',
-          code: 401,
-          message: '이메일이나 비밀번호가 일치하지 않습니다.',
-        }
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
       }
-      if (!user.staff?.is_staff || !user.id) {
-        return {
-          __typename: 'HttpError',
-          code: 401,
-          message: '허가되지 않은 사용자입니다.',
-        }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
       }
       const { encrypted } = encryptPassword({
         plain: password,
-        originalSalt: user.passwordSalt,
+        originalSalt: user.passwordSalt ?? undefined,
       })
       if (encrypted !== user.password) {
         return {
@@ -315,7 +348,7 @@ const resolvers: Resolvers = {
         user: {
           id: user.id,
           email: user.email,
-          isAdmin: user.staff.is_staff,
+          isAdmin: staff.isAuthorized,
           __typename: 'User',
         },
         token: generateToken({
@@ -325,8 +358,17 @@ const resolvers: Resolvers = {
       }
     },
     createConcertCategory: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -335,17 +377,21 @@ const resolvers: Resolvers = {
       }
 
       const { title } = args.input
-      const concertCategory = await new ConcertCategory({
-        title,
-      }).create()
-      return {
-        ...concertCategory,
-        __typename: 'ConcertCategory',
-      }
+      const concertCategory = await ConcertCategoryService.create({ title })
+      return concertCategory
     },
     createConcert: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -361,7 +407,7 @@ const resolvers: Resolvers = {
         posterURLs,
         location,
       } = args.input
-      const concert = await new Concert({
+      const concert = await ConcertService.create({
         concertCategoryId,
         artist,
         location,
@@ -374,22 +420,22 @@ const resolvers: Resolvers = {
         posters: posterURLs.map((url) => ({
           imageURL: url,
         })),
-      }).create()
+      })
 
-      return {
-        ...concert,
-        date: concert.date ? concert.date.toISOString() : null,
-        tickets: concert.tickets.map((ticket) => ({
-          ...ticket,
-          openDate: new Date(ticket.openDate).toISOString(),
-        })),
-        createdAt: concert.createdAt.toISOString(),
-        __typename: 'Concert',
-      }
+      return concert
     },
     updateConcert: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -406,8 +452,7 @@ const resolvers: Resolvers = {
         concertCategoryId,
         location,
       } = args.input
-      const updated = await new Concert({
-        id,
+      const updated = await ConcertService.updateById(id, {
         artist,
         date: new Date(date),
         title,
@@ -424,47 +469,53 @@ const resolvers: Resolvers = {
             }))
           : undefined,
         concertCategoryId,
-      }).update()
+      })
 
-      return {
-        ...updated,
-        createdAt: updated.createdAt.toISOString(),
-        updatedAt: updated.updatedAt
-          ? updated.updatedAt.toISOString()
-          : undefined,
-        tickets: updated.tickets.map((ticket) => ({
-          ...ticket,
-          openDate: new Date(ticket.openDate).toISOString(),
-        })),
-        date: updated.date ? updated.date.toISOString() : null,
-        __typename: 'Concert',
-      }
+      return updated
     },
     removeConcert: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
           },
         })
       }
-      const existing = await Concert.find(args.input.id)
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const existing = await ConcertService.getConcertById(args.input.id)
       if (!existing)
         return {
           __typename: 'HttpError',
           code: 404,
           message: '콘서트가 존재하지 않습니다.',
         }
-      const removed = await Concert.remove(args.input.id)
+      const removed = await ConcertService.deleteById(args.input.id)
       return {
         id: removed.id,
         __typename: 'RemovedConcert',
       }
     },
     updateConcertTicket: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -472,20 +523,25 @@ const resolvers: Resolvers = {
         })
       }
       const { id, openDate, seller, sellingURL } = args.input
-      const updated = await ConcertTicket.update(id, {
+      const updated = await ConcertTicketService.updateById(id, {
         openDate: openDate ? new Date(openDate) : undefined,
         seller: seller ?? undefined,
         sellingURL: sellingURL ?? undefined,
       })
-      return {
-        ...updated,
-        openDate: updated.openDate.toISOString(),
-        __typename: 'ConcertTicket',
-      }
+      return updated
     },
     createConcertPoster: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -493,27 +549,31 @@ const resolvers: Resolvers = {
         })
       }
       const { concertId, imageURL } = args.input
-      const poster = new ConcertPoster({
+      const poster = await ConcertPosterService.create({
         concertId,
         imageURL,
       })
-      const created = await poster.create()
-      if (!created) {
+      if (!poster) {
         return {
           __typename: 'HttpError',
           code: 500,
           message: 'Internal Server Error',
         }
       }
-      return {
-        __typename: 'ConcertPoster',
-        id: created.id,
-        imageURL: created.imageURL,
-      }
+      return poster
     },
     updateConcertPoster: async (parent, args, ctx) => {
-      const user = await AccountModel.findByAccessToken(ctx.token ?? '')
-      if (!user || !user.staff?.is_staff) {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      const { id: userId } = user
+      const staff = await StaffService.getStaffByUserId(userId)
+      if (!staff) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,
@@ -521,13 +581,18 @@ const resolvers: Resolvers = {
         })
       }
       const { id, imageURL } = args.input
-      const updated = await ConcertPoster.update(id, {
-        imageURL: imageURL ?? undefined,
-      })
-      return {
-        ...updated,
-        __typename: 'ConcertPoster',
+      if (!imageURL) {
+        throw new GraphQLError('invalid image url', {
+          extensions: {
+            code: 400,
+          },
+        })
       }
+      const updated = await ConcertPosterService.updateImageURLById(
+        id,
+        imageURL
+      )
+      return updated
     },
   },
 }

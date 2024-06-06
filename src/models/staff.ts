@@ -1,5 +1,9 @@
-import { type Staff as PrismaStaff } from '@coldsurfers/prisma-schema'
-import { prisma } from '../accounts-schema/libs/prismaClient'
+import {
+  PrismaClient,
+  type Staff as PrismaStaff,
+} from '@coldsurfers/prisma-schema'
+
+const prisma = new PrismaClient()
 
 class StaffModel {
   private prismaModel: PrismaStaff
@@ -25,6 +29,10 @@ class StaffModel {
     })
 
     return staff ? new StaffModel(staff) : null
+  }
+
+  get isAuthorized() {
+    return this.prismaModel.is_authorized
   }
 }
 
