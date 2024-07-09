@@ -15,8 +15,13 @@ export default class AuthTokenService {
     }
   }
 
-  public static async delete(data: { user_id: number }) {
-    const deleted = await AuthTokenModel.delete(data)
+  public static async delete(data: { id: string }) {
+    const deleted = await AuthTokenModel.deleteById(data)
     return deleted
+  }
+
+  public static async findByUserId(userId: number) {
+    const authToken = await AuthTokenModel.findByUserId(userId)
+    return authToken
   }
 }

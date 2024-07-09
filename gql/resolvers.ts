@@ -390,7 +390,15 @@ const resolvers: Resolvers = {
           },
         })
       }
-      await AuthTokenService.delete({ user_id: user.id })
+      const authToken = await AuthTokenService.findByUserId(user.id)
+      if (!authToken) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      await AuthTokenService.delete({ id: authToken.id })
       return {
         __typename: 'User',
         id: user.id,

@@ -29,7 +29,9 @@ export class UserModel {
     const user = await prisma.user.findFirst({
       where: {
         auth_token: {
-          access_token: accessToken,
+          some: {
+            access_token: accessToken,
+          },
         },
       },
     })
