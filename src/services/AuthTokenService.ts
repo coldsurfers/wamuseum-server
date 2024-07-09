@@ -14,4 +14,9 @@ export default class AuthTokenService {
       refreshToken: authToken.refreshToken,
     }
   }
+
+  public static async delete(data: { user_id: number }) {
+    const deleted = await AuthTokenModel.delete(data)
+    return deleted
+  }
 }

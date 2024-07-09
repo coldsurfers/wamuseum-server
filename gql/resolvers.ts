@@ -1,5 +1,7 @@
 import { isAfter, addMinutes } from 'date-fns'
 import { GraphQLError } from 'graphql'
+import { CredentialsProviderSchema } from '@coldsurfers/zod-schema'
+import { z } from 'zod'
 import {
   ConcertPosterService,
   EmailAuthRequestService,
@@ -8,6 +10,7 @@ import {
   UserService,
   StaffService,
   ConcertService,
+  AuthTokenService,
 } from '../src/services'
 import { Resolvers } from './resolvers-types'
 import { sendEmail } from '../src/utils/mailer'
@@ -243,11 +246,18 @@ const resolvers: Resolvers = {
           message: '이미 가입이 완료 된 이메일입니다',
         }
       }
+      const { encrypted, salt } = encryptPassword({
+        plain: args.input.password,
+        originalSalt: undefined,
+      })
+
       const createdUser = await UserService.createUser({
         email: args.input.email,
-        password: args.input.password,
-        passwordSalt: '',
-        provider: '',
+        password: encrypted,
+        passwordSalt: salt,
+        provider: 'credentials' satisfies z.TypeOf<
+          typeof CredentialsProviderSchema
+        >,
       })
       if (!createdUser.id) {
         return {
@@ -265,8 +275,8 @@ const resolvers: Resolvers = {
       })
       await sendEmail({
         to: createdEmailAuthRequest.email,
-        subject: 'Billets 이메일 인증 번호',
-        html: `Billets의 이메일 인증 번호는 ${createdEmailAuthRequest.authcode}입니다. 3분내에 입력 해 주세요.`,
+        subject: 'Wamuseum 이메일 인증 번호',
+        html: `Wamuseum의 이메일 인증 번호는 ${createdEmailAuthRequest.authcode}입니다. 3분내에 입력 해 주세요.`,
         smtpOptions: {
           service: process.env.MAILER_SERVICE,
           auth: {
@@ -351,17 +361,40 @@ const resolvers: Resolvers = {
           message: '이메일이나 비밀번호가 일치하지 않습니다.',
         }
       }
+      const authToken = await AuthTokenService.create({
+        access_token: generateToken({
+          id: user.id,
+        }),
+        refresh_token: generateToken({
+          id: user.id,
+        }),
+        user_id: user.id,
+      })
       return {
+        __typename: 'UserWithAuthToken',
         user: {
           id: user.id,
           email: user.email,
           isAdmin: staff.isAuthorized,
           __typename: 'User',
         },
-        token: generateToken({
-          id: user.id,
-        }),
-        __typename: 'UserWithToken',
+        authToken,
+      }
+    },
+    logout: async (parent, args, ctx) => {
+      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
+      if (!user) {
+        throw new GraphQLError('권한이 없습니다', {
+          extensions: {
+            code: 401,
+          },
+        })
+      }
+      await AuthTokenService.delete({ user_id: user.id })
+      return {
+        __typename: 'User',
+        id: user.id,
+        email: user.email,
       }
     },
     createConcertCategory: async (parent, args, ctx) => {

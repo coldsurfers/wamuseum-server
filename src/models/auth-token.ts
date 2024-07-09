@@ -24,6 +24,15 @@ export default class AuthTokenModel {
     return new AuthTokenModel(authToken)
   }
 
+  public static async delete(data: { user_id: number }) {
+    const deleted = await prisma.authToken.delete({
+      where: {
+        user_id: data.user_id,
+      },
+    })
+    return deleted
+  }
+
   get accessToken() {
     return this.prismaModel.access_token
   }
