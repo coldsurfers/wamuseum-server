@@ -1,6 +1,7 @@
 import { VercelApiHandler, VercelRequest, VercelResponse } from '@vercel/node'
 import { S3Client } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+import { StaffService, UserService } from '../../src/services'
 
 const handler: VercelApiHandler = async (
   req: VercelRequest,
@@ -11,7 +12,10 @@ const handler: VercelApiHandler = async (
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   } else {
     // todo: add white list url of cors
-    res.setHeader('Access-Control-Allow-Origin', 'https://coldsurf.io')
+    res.setHeader(
+      'Access-Control-Allow-Origin',
+      'https://billets-admin.coldsurf.io'
+    )
   }
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
@@ -22,6 +26,19 @@ const handler: VercelApiHandler = async (
   )
   if (req.method === 'OPTIONS' || req.method !== 'GET') {
     res.status(200).end()
+    return
+  }
+
+  const { authorization } = req.headers
+
+  const user = await UserService.getUserByAccessToken(authorization ?? '')
+  if (!user) {
+    res.status(401).send({})
+    return
+  }
+  const staff = await StaffService.getStaffByUserId(user.id)
+  if (!staff) {
+    res.status(403).send({})
     return
   }
 
