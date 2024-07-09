@@ -12,7 +12,7 @@ class StaffModel {
     this.prismaModel = staff
   }
 
-  public static async findById(id: string): Promise<StaffModel | null> {
+  public static async findById(id: number): Promise<StaffModel | null> {
     const staff = await prisma.staff.findUnique({
       where: {
         id,
