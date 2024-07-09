@@ -40,13 +40,20 @@ class EmailAuthRequestService {
       id,
       authenticated
     )
-    const { createdAt, email: lastestEmail, id: updatedId, authcode } = updated
+    const {
+      createdAt,
+      email: lastestEmail,
+      id: updatedId,
+      authcode,
+      authenticated: updatedAuthenticated,
+    } = updated
     return {
       __typename: 'EmailAuthRequest',
       createdAt: createdAt.toISOString(),
       email: lastestEmail,
       id: updatedId,
       authcode,
+      authenticated: updatedAuthenticated,
     }
   }
 }
