@@ -15,6 +15,12 @@ export type Scalars = {
   Float: number;
 };
 
+export type AuthToken = {
+  __typename?: 'AuthToken';
+  accessToken: Scalars['String'];
+  refreshToken: Scalars['String'];
+};
+
 export type AuthenticateEmailAuthRequestData = EmailAuthRequest | HttpError;
 
 export type AuthenticateEmailAuthRequestInput = {
@@ -156,7 +162,7 @@ export type HttpError = {
   message: Scalars['String'];
 };
 
-export type LoginData = HttpError | UserWithToken;
+export type LoginData = HttpError | UserWithAuthToken;
 
 export type LoginInput = {
   email: Scalars['String'];
@@ -172,6 +178,7 @@ export type Mutation = {
   createEmailAuthRequest?: Maybe<EmailAuthRequest>;
   createUser?: Maybe<CreateUserData>;
   login?: Maybe<LoginData>;
+  logout: User;
   removeConcert?: Maybe<RemoveConcertData>;
   updateConcert?: Maybe<UpdateConcertData>;
   updateConcertPoster?: Maybe<UpdateConcertPosterData>;
@@ -323,9 +330,9 @@ export type User = {
 
 export type UserData = HttpError | User;
 
-export type UserWithToken = {
-  __typename?: 'UserWithToken';
-  token: Scalars['String'];
+export type UserWithAuthToken = {
+  __typename?: 'UserWithAuthToken';
+  authToken: AuthToken;
   user: User;
 };
 
@@ -398,6 +405,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AuthToken: ResolverTypeWrapper<AuthToken>;
   AuthenticateEmailAuthRequestData: ResolversTypes['EmailAuthRequest'] | ResolversTypes['HttpError'];
   AuthenticateEmailAuthRequestInput: AuthenticateEmailAuthRequestInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
@@ -428,7 +436,7 @@ export type ResolversTypes = {
   Float: ResolverTypeWrapper<Scalars['Float']>;
   HttpError: ResolverTypeWrapper<HttpError>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
-  LoginData: ResolversTypes['HttpError'] | ResolversTypes['UserWithToken'];
+  LoginData: ResolversTypes['HttpError'] | ResolversTypes['UserWithAuthToken'];
   LoginInput: LoginInput;
   Mutation: ResolverTypeWrapper<{}>;
   Pagination: ResolverTypeWrapper<Pagination>;
@@ -445,11 +453,12 @@ export type ResolversTypes = {
   UpdateConcertTicketInput: UpdateConcertTicketInput;
   User: ResolverTypeWrapper<User>;
   UserData: ResolversTypes['HttpError'] | ResolversTypes['User'];
-  UserWithToken: ResolverTypeWrapper<UserWithToken>;
+  UserWithAuthToken: ResolverTypeWrapper<UserWithAuthToken>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AuthToken: AuthToken;
   AuthenticateEmailAuthRequestData: ResolversParentTypes['EmailAuthRequest'] | ResolversParentTypes['HttpError'];
   AuthenticateEmailAuthRequestInput: AuthenticateEmailAuthRequestInput;
   Boolean: Scalars['Boolean'];
@@ -480,7 +489,7 @@ export type ResolversParentTypes = {
   Float: Scalars['Float'];
   HttpError: HttpError;
   Int: Scalars['Int'];
-  LoginData: ResolversParentTypes['HttpError'] | ResolversParentTypes['UserWithToken'];
+  LoginData: ResolversParentTypes['HttpError'] | ResolversParentTypes['UserWithAuthToken'];
   LoginInput: LoginInput;
   Mutation: {};
   Pagination: Pagination;
@@ -497,7 +506,13 @@ export type ResolversParentTypes = {
   UpdateConcertTicketInput: UpdateConcertTicketInput;
   User: User;
   UserData: ResolversParentTypes['HttpError'] | ResolversParentTypes['User'];
-  UserWithToken: UserWithToken;
+  UserWithAuthToken: UserWithAuthToken;
+};
+
+export type AuthTokenResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['AuthToken'] = ResolversParentTypes['AuthToken']> = {
+  accessToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  refreshToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AuthenticateEmailAuthRequestDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['AuthenticateEmailAuthRequestData'] = ResolversParentTypes['AuthenticateEmailAuthRequestData']> = {
@@ -607,7 +622,7 @@ export type HttpErrorResolvers<ContextType = GraphqlContext, ParentType extends 
 };
 
 export type LoginDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['LoginData'] = ResolversParentTypes['LoginData']> = {
-  __resolveType: TypeResolveFn<'HttpError' | 'UserWithToken', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'HttpError' | 'UserWithAuthToken', ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
@@ -618,6 +633,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   createEmailAuthRequest?: Resolver<Maybe<ResolversTypes['EmailAuthRequest']>, ParentType, ContextType, RequireFields<MutationCreateEmailAuthRequestArgs, 'input'>>;
   createUser?: Resolver<Maybe<ResolversTypes['CreateUserData']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginData']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;
+  logout?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   removeConcert?: Resolver<Maybe<ResolversTypes['RemoveConcertData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertArgs, 'input'>>;
   updateConcert?: Resolver<Maybe<ResolversTypes['UpdateConcertData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertArgs, 'input'>>;
   updateConcertPoster?: Resolver<Maybe<ResolversTypes['UpdateConcertPosterData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertPosterArgs, 'input'>>;
@@ -674,13 +690,14 @@ export type UserDataResolvers<ContextType = GraphqlContext, ParentType extends R
   __resolveType: TypeResolveFn<'HttpError' | 'User', ParentType, ContextType>;
 };
 
-export type UserWithTokenResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserWithToken'] = ResolversParentTypes['UserWithToken']> = {
-  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+export type UserWithAuthTokenResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserWithAuthToken'] = ResolversParentTypes['UserWithAuthToken']> = {
+  authToken?: Resolver<ResolversTypes['AuthToken'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = GraphqlContext> = {
+  AuthToken?: AuthTokenResolvers<ContextType>;
   AuthenticateEmailAuthRequestData?: AuthenticateEmailAuthRequestDataResolvers<ContextType>;
   Concert?: ConcertResolvers<ContextType>;
   ConcertCategory?: ConcertCategoryResolvers<ContextType>;
@@ -710,6 +727,6 @@ export type Resolvers<ContextType = GraphqlContext> = {
   UpdateConcertTicketData?: UpdateConcertTicketDataResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   UserData?: UserDataResolvers<ContextType>;
-  UserWithToken?: UserWithTokenResolvers<ContextType>;
+  UserWithAuthToken?: UserWithAuthTokenResolvers<ContextType>;
 };
 

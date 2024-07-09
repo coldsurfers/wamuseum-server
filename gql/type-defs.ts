@@ -8,9 +8,14 @@ const typeDefs = `#graphql
     passwordSalt: String
   }
 
-  type UserWithToken {
+  type AuthToken {
+    accessToken: String!
+    refreshToken: String!
+  }
+
+  type UserWithAuthToken {
     user: User!
-    token: String!
+    authToken: AuthToken!
   }
 
   type EmailAuthRequest {
@@ -165,7 +170,7 @@ const typeDefs = `#graphql
 
   union CreateUserData = User | HttpError
 
-  union LoginData = UserWithToken | HttpError
+  union LoginData = UserWithAuthToken | HttpError
 
   union ConcertListData = ConcertListWithPagination | HttpError
 
@@ -229,6 +234,7 @@ const typeDefs = `#graphql
     login(
       input: LoginInput!
     ): LoginData
+    logout: User!
     createConcertCategory(
       input: CreateConcertCategoryInput!
     ): ConcertCategoryData
