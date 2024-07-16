@@ -455,6 +455,7 @@ const resolvers: Resolvers = {
         posterURLs,
         location,
       } = args.input
+
       const concert = await ConcertService.create({
         concertCategoryId,
         artist,

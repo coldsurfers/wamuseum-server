@@ -4,19 +4,40 @@ import {
   type ConcertTicketPrice as PrismaConcertTicketPrice,
   type ConcertCategory as PrismaConcertCategory,
 } from '@coldsurfers/prisma-schema'
+import {
+  Concert,
+  CreateConcertConcertTicketPricesInput,
+} from '../../gql/resolvers-types'
 import { prisma } from '..'
 
-class ConcertModel {
-  private prismaModel: PrismaConcert
-
-  private _tickets?: (PrismaConcertTicket & {
-    ticketPrices?: PrismaConcertTicketPrice[]
+type ConcertPrismaModel = PrismaConcert & {
+  concertCategory: PrismaConcertCategory
+} & {
+  tickets: (PrismaConcertTicket & {
+    ticketPrices: PrismaConcertTicketPrice[]
   })[]
+}
 
-  private _concertCategory?: PrismaConcertCategory
+class ConcertModel {
+  private prismaModel: ConcertPrismaModel
 
-  constructor(concert: PrismaConcert) {
+  constructor(concert: ConcertPrismaModel) {
     this.prismaModel = concert
+  }
+
+  public serialize(): Concert {
+    return {
+      __typename: 'Concert',
+      ...this.prismaModel,
+      concertCategory: this.prismaModel.concertCategory,
+      createdAt: this.prismaModel.createdAt.toISOString(),
+      date: this.prismaModel.date?.toISOString() ?? null,
+      updatedAt: this.prismaModel.updatedAt?.toISOString() ?? null,
+      tickets: this.prismaModel.tickets.map((ticket) => ({
+        ...ticket,
+        openDate: ticket.openDate.toISOString(),
+      })),
+    }
   }
 
   public static async findById(id: string) {
@@ -88,7 +109,12 @@ class ConcertModel {
     location?: string
     concertCategoryId?: number
     artist?: string
-    tickets?: { openDate: Date; seller: string; sellingURL: string }[]
+    tickets?: {
+      openDate: Date
+      seller: string
+      sellingURL: string
+      ticketPrices: CreateConcertConcertTicketPricesInput[]
+    }[]
     posters?: { imageURL: string }[]
   }) {
     const created = await prisma.concert.create({
@@ -103,11 +129,20 @@ class ConcertModel {
         title: data.title,
         concertCategoryId: data.concertCategoryId,
         artist: data.artist,
-        tickets: {
-          createMany: {
-            data: data.tickets ?? [],
-          },
-        },
+        tickets: data.tickets
+          ? {
+              create: data.tickets.map((ticket) => ({
+                ...ticket,
+                ticketPrices: ticket.ticketPrices
+                  ? {
+                      createMany: {
+                        data: ticket.ticketPrices,
+                      },
+                    }
+                  : undefined,
+              })),
+            }
+          : undefined,
       },
       include: {
         tickets: {
@@ -158,9 +193,19 @@ class ConcertModel {
           },
         },
       },
+      include: {
+        concertCategory: true,
+        tickets: {
+          include: {
+            ticketPrices: true,
+          },
+        },
+      },
     })
 
-    return new ConcertModel(updated)
+    return new ConcertModel({
+      ...updated,
+    })
   }
 
   get createdAt() {
@@ -185,12 +230,12 @@ class ConcertModel {
 
   get tickets() {
     // eslint-disable-next-line no-underscore-dangle
-    return this._tickets
+    return this.prismaModel.tickets
   }
 
   get concertCategory() {
     // eslint-disable-next-line no-underscore-dangle
-    return this._concertCategory
+    return this.prismaModel.concertCategory
   }
 }
 

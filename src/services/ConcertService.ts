@@ -1,5 +1,8 @@
 import ConcertModel from '../models/concert'
-import { Concert as ConcertResolverType } from '../../gql/resolvers-types'
+import {
+  Concert as ConcertResolverType,
+  CreateConcertConcertTicketPricesInput,
+} from '../../gql/resolvers-types'
 
 export default class ConcertService {
   public static async getList({
@@ -38,18 +41,7 @@ export default class ConcertService {
   ): Promise<ConcertResolverType | null> {
     const concert = await ConcertModel.findById(id)
     if (!concert) return null
-    return {
-      __typename: 'Concert',
-      ...concert,
-      id: concert.id,
-      title: concert.title,
-      concertCategory: concert.concertCategory ?? {
-        __typename: 'ConcertCategory',
-        id: 0,
-        title: '',
-      },
-      createdAt: concert.createdAt.toISOString(),
-    }
+    return concert.serialize()
   }
 
   public static async getAllCount(): Promise<number> {
@@ -66,7 +58,12 @@ export default class ConcertService {
     location?: string
     concertCategoryId?: number
     artist?: string
-    tickets?: { openDate: Date; seller: string; sellingURL: string }[]
+    tickets?: {
+      openDate: Date
+      seller: string
+      sellingURL: string
+      ticketPrices: CreateConcertConcertTicketPricesInput[]
+    }[]
     posters?: { imageURL: string }[]
   }): Promise<ConcertResolverType> {
     const concert = await ConcertModel.create(data)
