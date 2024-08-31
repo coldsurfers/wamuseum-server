@@ -1,5 +1,6 @@
 import { isAfter, addMinutes } from 'date-fns'
 import { GraphQLError } from 'graphql'
+import authResolvers from '../src/resolvers/authResolvers'
 import {
   ConcertPosterService,
   EmailAuthRequestService,
@@ -8,12 +9,9 @@ import {
   UserService,
   StaffService,
   ConcertService,
-  AuthTokenService,
 } from '../src/services'
 import { Resolvers } from './resolvers-types'
 import { sendEmail } from '../src/utils/mailer'
-import encryptPassword from '../src/utils/encryptPassword'
-import { generateToken } from '../src/utils/generateToken'
 import userResolvers from '../src/resolvers/userResolvers'
 
 const resolvers: Resolvers = {
@@ -145,6 +143,7 @@ const resolvers: Resolvers = {
   },
   Mutation: {
     ...userResolvers.Mutation,
+    ...authResolvers.Mutation,
     createEmailAuthRequest: async (parent, args) => {
       const { email } = args.input
       const createdEmailAuthRequest = await EmailAuthRequestService.create({
@@ -206,80 +205,6 @@ const resolvers: Resolvers = {
         __typename: 'HttpError',
         code: 401,
         message: '유효하지 않은 인증번호 입니다.',
-      }
-    },
-    login: async (parent, args) => {
-      const { email, password } = args.input
-      const user = await UserService.getUserByEmail(email)
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { encrypted } = encryptPassword({
-        plain: password,
-        originalSalt: user.passwordSalt ?? undefined,
-      })
-      if (encrypted !== user.password) {
-        return {
-          __typename: 'HttpError',
-          code: 401,
-          message: '이메일이나 비밀번호가 일치하지 않습니다.',
-        }
-      }
-      const authToken = await AuthTokenService.create({
-        access_token: generateToken({
-          id: user.id,
-        }),
-        refresh_token: generateToken({
-          id: user.id,
-        }),
-        user_id: user.id,
-      })
-      return {
-        __typename: 'UserWithAuthToken',
-        user: {
-          id: user.id,
-          email: user.email,
-          isAdmin: staff.isAuthorized,
-          __typename: 'User',
-        },
-        authToken,
-      }
-    },
-    logout: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const authToken = await AuthTokenService.findByUserId(user.id)
-      if (!authToken) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      await AuthTokenService.delete({ id: authToken.id })
-      return {
-        __typename: 'User',
-        id: user.id,
-        email: user.email,
       }
     },
     createConcertCategory: async (parent, args, ctx) => {
