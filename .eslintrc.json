@@ -13,9 +13,7 @@
   "plugins": [
     "@typescript-eslint",
     "prettier",
-    "plugin:import/errors",
-    "plugin:import/warnings",
-    "plugin:import/typescript"
+    "import"
   ],
   "rules": {
     "prettier/prettier": "error",
@@ -45,6 +43,7 @@
         "extensions": [".js", ".ts", ".jsx", ".tsx"]
       },
       "typescript": {
+        "alwaysTryTypes": true,
         "project": "./tsconfig.json"
       }
     }
