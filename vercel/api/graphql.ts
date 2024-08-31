@@ -51,15 +51,16 @@ const handler: VercelApiHandler = async (
   res: VercelResponse
 ) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true')
-  if (process.env.NODE_ENV === 'development') {
+
+  if (process.env.npm_lifecycle_event === 'debug') {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   } else {
-    // todo: add white list url of cors
     res.setHeader(
       'Access-Control-Allow-Origin',
       'https://billets-admin.coldsurf.io'
     )
   }
+
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader(
