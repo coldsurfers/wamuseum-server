@@ -1,34 +1,13 @@
 import { VercelApiHandler, VercelRequest, VercelResponse } from '@vercel/node'
 import { S3Client } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+import allowVercelCors from '../../src/utils/allowVercelCors'
 import { StaffService, UserService } from '../../src/services'
 
 const handler: VercelApiHandler = async (
   req: VercelRequest,
   res: VercelResponse
 ) => {
-  res.setHeader('Access-Control-Allow-Credentials', 'true')
-  if (process.env.NODE_ENV === 'development') {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
-  } else {
-    // todo: add white list url of cors
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      'https://billets-admin.coldsurf.io'
-    )
-  }
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS,GET')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
-  if (req.method === 'OPTIONS' || req.method !== 'GET') {
-    res.status(200).end()
-    return
-  }
-
   const { authorization } = req.headers
 
   const user = await UserService.getUserByAccessToken(authorization ?? '')
@@ -66,4 +45,4 @@ const handler: VercelApiHandler = async (
   res.status(200).json(post)
 }
 
-export default handler
+export default allowVercelCors(handler)
