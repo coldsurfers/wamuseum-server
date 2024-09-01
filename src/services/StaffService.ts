@@ -1,8 +1,9 @@
-import StaffModel from '../models/staff'
+import StaffDTO from 'src/dtos/StaffDTO'
 
 class StaffService {
   public static async getStaffByUserId(userId: number) {
-    return StaffModel.findByUserId(userId)
+    const staffDTO = await StaffDTO.find({ userId })
+    return staffDTO
   }
 }
 

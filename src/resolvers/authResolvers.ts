@@ -16,6 +16,7 @@ const authResolvers: Resolvers = {
           email,
           requiredRole: 'staff',
         })
+
       const { encrypted } = encryptPassword({
         plain: password,
         originalSalt: authorizedUser.passwordSalt ?? undefined,
@@ -29,18 +30,19 @@ const authResolvers: Resolvers = {
       }
       const authToken = await AuthTokenService.create({
         access_token: generateToken({
-          id: authorizedUser.id,
+          id: authorizedUser.id ?? 0,
         }),
         refresh_token: generateToken({
-          id: authorizedUser.id,
+          id: authorizedUser.id ?? 0,
         }),
-        user_id: authorizedUser.id,
+        user_id: authorizedUser.id ?? 0,
       })
+      const serializedUser = authorizedUser.serialize()
       return {
         __typename: 'UserWithAuthToken',
         user: {
-          id: authorizedUser.id,
-          email: authorizedUser.email,
+          id: serializedUser.id,
+          email: serializedUser.email,
           isAdmin: authorizedStaff?.isAuthorized,
           __typename: 'User',
         },
@@ -49,7 +51,7 @@ const authResolvers: Resolvers = {
     },
     logout: async (parent, args, ctx) => {
       const { user } = await authorizeUser(ctx, { requiredRole: 'staff' })
-      const authToken = await AuthTokenService.findByUserId(user.id)
+      const authToken = await AuthTokenService.findByUserId(user.id ?? 0)
       if (!authToken) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
@@ -58,10 +60,11 @@ const authResolvers: Resolvers = {
         })
       }
       await AuthTokenService.delete({ id: authToken.id })
+      const serializedUser = user.serialize()
       return {
         __typename: 'User',
-        id: user.id,
-        email: user.email,
+        id: serializedUser.id,
+        email: serializedUser.email,
       }
     },
     createEmailAuthRequest: async (parent, args) => {
@@ -81,7 +84,7 @@ const authResolvers: Resolvers = {
           },
         },
       })
-      return createdEmailAuthRequest
+      return createdEmailAuthRequest.serialize()
     },
     authenticateEmailAuthRequest: async (parent, args) => {
       const { email, authcode } = args.input
@@ -100,6 +103,13 @@ const authResolvers: Resolvers = {
           message: '이미 인증 되었습니다.',
         }
       }
+      if (!latest.createdAt) {
+        return {
+          __typename: 'HttpError',
+          code: 400,
+          message: 'invalid createdAt value',
+        }
+      }
       if (
         isAfter(
           new Date(latest.createdAt),
@@ -113,12 +123,20 @@ const authResolvers: Resolvers = {
         }
       }
 
+      if (!latest.id) {
+        return {
+          __typename: 'HttpError',
+          code: 400,
+          message: 'invalid id value',
+        }
+      }
+
       if (authcode === latest.authcode) {
         const result = await EmailAuthRequestService.updateAuthenticatedById(
           latest.id,
           true
         )
-        return result
+        return result.serialize()
       }
 
       return {

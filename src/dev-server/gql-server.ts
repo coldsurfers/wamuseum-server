@@ -60,7 +60,7 @@ async function main() {
           const user = await UserService.getUserByAccessToken(
             authorization ?? ''
           )
-          if (!user) {
+          if (!user || !user.id) {
             return rep.status(401).send({})
           }
           const staff = await StaffService.getStaffByUserId(user.id)

@@ -11,7 +11,7 @@ const handler: VercelApiHandler = async (
   const { authorization } = req.headers
 
   const user = await UserService.getUserByAccessToken(authorization ?? '')
-  if (!user) {
+  if (!user || !user.id) {
     res.status(401).send({})
     return
   }

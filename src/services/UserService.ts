@@ -1,73 +1,42 @@
-import { UserModel } from '../models/user'
-import { User as UserResolverType } from '../../gql/resolvers-types'
+import UserDTO from 'src/dtos/UserDTO'
 
 class UserService {
-  static async getUserById(id: number): Promise<UserResolverType | null> {
-    const user = await UserModel.findById(id)
-    if (!user) return null
-    const { email, id: userId, createdAt, password, passwordSalt } = user
-    return {
-      __typename: 'User',
-      email,
-      id: userId,
-      createdAt: createdAt.toISOString(),
-      password,
-      passwordSalt,
-    }
+  static async getUserById(id: number): Promise<UserDTO | null> {
+    const userDTO = await UserDTO.find({ id })
+    return userDTO
   }
 
-  static async getUserByEmail(email: string): Promise<UserResolverType | null> {
-    const user = await UserModel.findByEmail(email)
-    if (!user) return null
-    const {
-      email: userEmail,
-      id: userId,
-      createdAt,
-      password,
-      passwordSalt,
-    } = user
-    return {
-      __typename: 'User',
-      email: userEmail,
-      id: userId,
-      createdAt: createdAt.toISOString(),
-      password,
-      passwordSalt,
-    }
+  static async getUserByEmail(email: string): Promise<UserDTO | null> {
+    const userDTO = await UserDTO.find({ email })
+    return userDTO
   }
 
   static async getUserByAccessToken(
     accessToken: string
-  ): Promise<UserResolverType | null> {
-    const user = await UserModel.findByAccessToken(accessToken)
-    if (!user) return null
-    const { email, id: userId, createdAt, password, passwordSalt } = user
-    return {
-      __typename: 'User',
-      email,
-      id: userId,
-      createdAt: createdAt.toISOString(),
-      password,
-      passwordSalt,
-    }
+  ): Promise<UserDTO | null> {
+    const userDTO = await UserDTO.find({ accessToken })
+    return userDTO
   }
 
-  static async createUser(data: {
+  static async createUser({
+    email,
+    provider,
+    password,
+    passwordSalt,
+  }: {
     email: string
     provider: string
     password?: string
     passwordSalt?: string
-  }): Promise<UserResolverType> {
-    const user = await UserModel.create(data)
-    const { email, id: userId, createdAt, password, passwordSalt } = user
-    return {
-      __typename: 'User',
+  }): Promise<UserDTO> {
+    const userDTO = new UserDTO({
       email,
-      id: userId,
-      createdAt: createdAt.toISOString(),
+      provider,
       password,
       passwordSalt,
-    }
+    })
+    const created = await userDTO.create()
+    return created
   }
 }
 

@@ -1,7 +1,7 @@
 import { GraphqlContext } from 'gql/Context'
 import { GraphQLError } from 'graphql'
-import { User } from 'gql/resolvers-types'
-import StaffModel from 'src/models/staff'
+import StaffDTO from 'src/dtos/StaffDTO'
+import UserDTO from 'src/dtos/UserDTO'
 import { StaffService, UserService } from '../services'
 
 export async function authorizeUser(
@@ -12,7 +12,7 @@ export async function authorizeUser(
   }
 ) {
   const { email } = options
-  let user: User | null = null
+  let user: UserDTO | null = null
 
   if (email) {
     user = await UserService.getUserByEmail(email)
@@ -36,8 +36,16 @@ export async function authorizeUser(
 
   const { id: userId } = user
 
+  if (!userId) {
+    throw new GraphQLError('권한이 없습니다', {
+      extensions: {
+        code: 401,
+      },
+    })
+  }
+
   const { requiredRole } = options
-  let staff: StaffModel | null = null
+  let staff: StaffDTO | null = null
   if (requiredRole) {
     if (requiredRole === 'staff') {
       staff = await StaffService.getStaffByUserId(userId)

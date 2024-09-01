@@ -12,17 +12,14 @@ const userResolvers: Resolvers = {
       const { user: authorizedUser } = await authorizeUser(ctx, {
         requiredRole: 'staff',
       })
-      return {
-        __typename: 'User',
-        id: authorizedUser.id,
-        email: authorizedUser.email,
-      }
+      const serializedUser = authorizedUser.serialize()
+      return serializedUser
     },
     user: async (parent, args, ctx) => {
       const { user: authorizedUser } = await authorizeUser(ctx, {
         requiredRole: 'staff',
       })
-      return authorizedUser
+      return authorizedUser.serialize()
     },
   },
   Mutation: {
@@ -87,7 +84,7 @@ const userResolvers: Resolvers = {
           message: 'created.id is not existing',
         }
       }
-      return createdUser
+      return createdUser.serialize()
     },
   },
 }
