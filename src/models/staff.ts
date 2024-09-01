@@ -31,8 +31,16 @@ class StaffModel {
     return staff ? new StaffModel(staff) : null
   }
 
+  get id() {
+    return this.prismaModel.id
+  }
+
   get isAuthorized() {
     return this.prismaModel.is_authorized
+  }
+
+  get userId() {
+    return this.prismaModel.user_id
   }
 }
 

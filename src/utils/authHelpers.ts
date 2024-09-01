@@ -1,7 +1,7 @@
 import { GraphqlContext } from 'gql/Context'
 import { GraphQLError } from 'graphql'
 import { User } from 'gql/resolvers-types'
-import StaffModel from 'src/models/staff'
+import StaffDTO from 'src/dtos/StaffDTO'
 import { StaffService, UserService } from '../services'
 
 export async function authorizeUser(
@@ -37,7 +37,7 @@ export async function authorizeUser(
   const { id: userId } = user
 
   const { requiredRole } = options
-  let staff: StaffModel | null = null
+  let staff: StaffDTO | null = null
   if (requiredRole) {
     if (requiredRole === 'staff') {
       staff = await StaffService.getStaffByUserId(userId)
