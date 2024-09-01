@@ -1,72 +1,28 @@
-import { GraphQLError } from 'graphql'
 import { CredentialsProviderSchema } from '@coldsurfers/zod-schema'
 import { z } from 'zod'
+import { authorizeUser } from 'src/utils/authHelpers'
 import { Resolvers } from '../../gql/resolvers-types'
-import { StaffService, UserService } from '../services'
+import { UserService } from '../services'
 import { validateCreateUser } from '../utils/validate'
 import encryptPassword from '../utils/encryptPassword'
 
 const userResolvers: Resolvers = {
   Query: {
     me: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { isAuthorized: isAuthorizedStaff } = staff
-      if (!isAuthorizedStaff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      const { user: authorizedUser } = await authorizeUser(ctx, {
+        requiredRole: 'staff',
+      })
       return {
         __typename: 'User',
-        id: user.id,
-        email: user.email,
+        id: authorizedUser.id,
+        email: authorizedUser.email,
       }
     },
     user: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const searchedUser = await UserService.getUserById(args.id)
-      if (!searchedUser || !searchedUser.id) {
-        return {
-          __typename: 'HttpError',
-          code: 404,
-          message: '해당 유저가 존재하지 않습니다.',
-        }
-      }
-      return searchedUser
+      const { user: authorizedUser } = await authorizeUser(ctx, {
+        requiredRole: 'staff',
+      })
+      return authorizedUser
     },
   },
   Mutation: {

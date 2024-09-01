@@ -1,27 +1,12 @@
 import { Resolvers } from 'gql/resolvers-types'
 import { GraphQLError } from 'graphql'
-import { ConcertPosterService, StaffService, UserService } from '../services'
+import { authorizeUser } from 'src/utils/authHelpers'
+import { ConcertPosterService } from '../services'
 
 const concertPosterResolvers: Resolvers = {
   Mutation: {
     createConcertPoster: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const { concertId, imageURL } = args.input
       const poster = await ConcertPosterService.create({
         concertId,
@@ -37,23 +22,7 @@ const concertPosterResolvers: Resolvers = {
       return poster
     },
     updateConcertPoster: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const { id, imageURL } = args.input
       if (!imageURL) {
         throw new GraphQLError('invalid image url', {

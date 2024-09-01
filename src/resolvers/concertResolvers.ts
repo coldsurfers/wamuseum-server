@@ -1,27 +1,11 @@
-import { GraphQLError } from 'graphql'
-import { ConcertService, StaffService, UserService } from '../services'
+import { authorizeUser } from 'src/utils/authHelpers'
+import { ConcertService } from '../services'
 import { Resolvers } from '../../gql/resolvers-types'
 
 const concertResolvers: Resolvers = {
   Query: {
     concert: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const concert = await ConcertService.getConcertById(args.id)
 
       if (!concert)
@@ -34,24 +18,8 @@ const concertResolvers: Resolvers = {
       return concert
     },
     concertList: async (parent, args, ctx) => {
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const { page, limit, orderBy } = args
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
       const concerts = await ConcertService.getList({
         page,
         limit,
@@ -76,23 +44,7 @@ const concertResolvers: Resolvers = {
   },
   Mutation: {
     createConcert: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const {
         concertCategoryId,
         artist,
@@ -120,23 +72,7 @@ const concertResolvers: Resolvers = {
       return concert
     },
     updateConcert: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const {
         id,
         artist,
@@ -169,23 +105,7 @@ const concertResolvers: Resolvers = {
       return updated
     },
     removeConcert: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const existing = await ConcertService.getConcertById(args.input.id)
       if (!existing)
         return {

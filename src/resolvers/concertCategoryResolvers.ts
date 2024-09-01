@@ -1,27 +1,11 @@
 import { Resolvers } from 'gql/resolvers-types'
-import { GraphQLError } from 'graphql'
-import { ConcertCategoryService, StaffService, UserService } from '../services'
+import { ConcertCategoryService } from '../services'
+import { authorizeUser } from '../utils/authHelpers'
 
 const concertCategoryResolvers: Resolvers = {
   Query: {
     concertCategory: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
 
       const concertCategory =
         await ConcertCategoryService.getConcertCategoryById(args.id)
@@ -35,23 +19,7 @@ const concertCategoryResolvers: Resolvers = {
       return concertCategory
     },
     concertCategoryList: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
       const list = await ConcertCategoryService.getAllConcertCategories()
       return {
         list,
@@ -61,23 +29,7 @@ const concertCategoryResolvers: Resolvers = {
   },
   Mutation: {
     createConcertCategory: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      await authorizeUser(ctx, { requiredRole: 'staff' })
 
       const { title } = args.input
       const concertCategory = await ConcertCategoryService.create({ title })
