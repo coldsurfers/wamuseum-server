@@ -1,15 +1,10 @@
 import { isAfter, addMinutes } from 'date-fns'
-import { GraphQLError } from 'graphql'
 import concertCategoryResolvers from 'src/resolvers/concertCategoryResolvers'
 import concertTicketResolvers from 'src/resolvers/concertTicketResolvers'
+import concertPosterResolvers from 'src/resolvers/concertPosterResolvers'
 import concertResolvers from '../src/resolvers/concertResolvers'
 import authResolvers from '../src/resolvers/authResolvers'
-import {
-  ConcertPosterService,
-  EmailAuthRequestService,
-  UserService,
-  StaffService,
-} from '../src/services'
+import { EmailAuthRequestService } from '../src/services'
 import { Resolvers } from './resolvers-types'
 import { sendEmail } from '../src/utils/mailer'
 import userResolvers from '../src/resolvers/userResolvers'
@@ -26,6 +21,7 @@ const resolvers: Resolvers = {
     ...concertResolvers.Mutation,
     ...concertCategoryResolvers.Mutation,
     ...concertTicketResolvers.Mutation,
+    ...concertPosterResolvers.Mutation,
     createEmailAuthRequest: async (parent, args) => {
       const { email } = args.input
       const createdEmailAuthRequest = await EmailAuthRequestService.create({
@@ -88,70 +84,6 @@ const resolvers: Resolvers = {
         code: 401,
         message: '유효하지 않은 인증번호 입니다.',
       }
-    },
-    createConcertPoster: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { concertId, imageURL } = args.input
-      const poster = await ConcertPosterService.create({
-        concertId,
-        imageURL,
-      })
-      if (!poster) {
-        return {
-          __typename: 'HttpError',
-          code: 500,
-          message: 'Internal Server Error',
-        }
-      }
-      return poster
-    },
-    updateConcertPoster: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id, imageURL } = args.input
-      if (!imageURL) {
-        throw new GraphQLError('invalid image url', {
-          extensions: {
-            code: 400,
-          },
-        })
-      }
-      const updated = await ConcertPosterService.updateImageURLById(
-        id,
-        imageURL
-      )
-      return updated
     },
   },
 }
