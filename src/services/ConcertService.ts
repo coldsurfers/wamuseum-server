@@ -1,3 +1,4 @@
+import ConcertDTO from '../dtos/ConcertDTO'
 import ConcertModel from '../models/concert'
 import { Concert as ConcertResolverType } from '../../gql/resolvers-types'
 
@@ -33,23 +34,9 @@ export default class ConcertService {
     }))
   }
 
-  public static async getConcertById(
-    id: string
-  ): Promise<ConcertResolverType | null> {
-    const concert = await ConcertModel.findById(id)
-    if (!concert) return null
-    return {
-      __typename: 'Concert',
-      ...concert,
-      id: concert.id,
-      title: concert.title,
-      concertCategory: concert.concertCategory ?? {
-        __typename: 'ConcertCategory',
-        id: 0,
-        title: '',
-      },
-      createdAt: concert.createdAt.toISOString(),
-    }
+  public static async getConcertById(id: string): Promise<ConcertDTO | null> {
+    const concert = await ConcertDTO.findById(id)
+    return concert
   }
 
   public static async getAllCount(): Promise<number> {

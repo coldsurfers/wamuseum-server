@@ -15,7 +15,7 @@ const concertResolvers: Resolvers = {
           message: '콘서트가 존재하지 않습니다.',
         }
 
-      return concert
+      return concert.serialize()
     },
     concertList: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
