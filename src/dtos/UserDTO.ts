@@ -1,3 +1,4 @@
+import { User } from 'gql/resolvers-types'
 import { UserModel } from 'src/models/user'
 
 export default class UserDTO {
@@ -118,5 +119,14 @@ export default class UserDTO {
       password: password ?? '',
       passwordSalt: passwordSalt ?? '',
     })
+  }
+
+  serialize(): User {
+    return {
+      __typename: 'User',
+      createdAt: this.createdAt?.toISOString(),
+      email: this.email,
+      id: this.id ?? 0,
+    }
   }
 }

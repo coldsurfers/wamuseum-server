@@ -16,6 +16,7 @@ const authResolvers: Resolvers = {
           email,
           requiredRole: 'staff',
         })
+
       const { encrypted } = encryptPassword({
         plain: password,
         originalSalt: authorizedUser.passwordSalt ?? undefined,
@@ -29,18 +30,19 @@ const authResolvers: Resolvers = {
       }
       const authToken = await AuthTokenService.create({
         access_token: generateToken({
-          id: authorizedUser.id,
+          id: authorizedUser.id ?? 0,
         }),
         refresh_token: generateToken({
-          id: authorizedUser.id,
+          id: authorizedUser.id ?? 0,
         }),
-        user_id: authorizedUser.id,
+        user_id: authorizedUser.id ?? 0,
       })
+      const serializedUser = authorizedUser.serialize()
       return {
         __typename: 'UserWithAuthToken',
         user: {
-          id: authorizedUser.id,
-          email: authorizedUser.email,
+          id: serializedUser.id,
+          email: serializedUser.email,
           isAdmin: authorizedStaff?.isAuthorized,
           __typename: 'User',
         },
@@ -49,7 +51,7 @@ const authResolvers: Resolvers = {
     },
     logout: async (parent, args, ctx) => {
       const { user } = await authorizeUser(ctx, { requiredRole: 'staff' })
-      const authToken = await AuthTokenService.findByUserId(user.id)
+      const authToken = await AuthTokenService.findByUserId(user.id ?? 0)
       if (!authToken) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
@@ -58,10 +60,11 @@ const authResolvers: Resolvers = {
         })
       }
       await AuthTokenService.delete({ id: authToken.id })
+      const serializedUser = user.serialize()
       return {
         __typename: 'User',
-        id: user.id,
-        email: user.email,
+        id: serializedUser.id,
+        email: serializedUser.email,
       }
     },
     createEmailAuthRequest: async (parent, args) => {
