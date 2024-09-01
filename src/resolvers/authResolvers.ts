@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql'
 import { isAfter, addMinutes } from 'date-fns'
-import { authorizeUser } from 'src/utils/authHelpers'
+import { authorizeUser } from '../utils/authHelpers'
 import { generateToken } from '../utils/generateToken'
 import encryptPassword from '../utils/encryptPassword'
 import { Resolvers } from '../../gql/resolvers-types'

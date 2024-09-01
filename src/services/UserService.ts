@@ -1,4 +1,4 @@
-import UserDTO from 'src/dtos/UserDTO'
+import UserDTO from '../dtos/UserDTO'
 
 class UserService {
   static async getUserById(id: number): Promise<UserDTO | null> {

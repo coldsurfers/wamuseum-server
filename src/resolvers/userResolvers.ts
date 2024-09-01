@@ -1,6 +1,6 @@
 import { CredentialsProviderSchema } from '@coldsurfers/zod-schema'
 import { z } from 'zod'
-import { authorizeUser } from 'src/utils/authHelpers'
+import { authorizeUser } from '../utils/authHelpers'
 import { Resolvers } from '../../gql/resolvers-types'
 import { UserService } from '../services'
 import { validateCreateUser } from '../utils/validate'

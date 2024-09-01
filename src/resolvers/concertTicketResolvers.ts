@@ -1,5 +1,5 @@
 import { Resolvers } from 'gql/resolvers-types'
-import { authorizeUser } from 'src/utils/authHelpers'
+import { authorizeUser } from '../utils/authHelpers'
 import { ConcertTicketService } from '../services'
 
 const concertTicketResolvers: Resolvers = {

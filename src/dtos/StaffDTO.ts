@@ -1,4 +1,4 @@
-import StaffModel from 'src/models/staff'
+import StaffModel from '../models/staff'
 
 export default class StaffDTO {
   id?: number

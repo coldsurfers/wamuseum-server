@@ -1,6 +1,6 @@
 import { Resolvers } from 'gql/resolvers-types'
 import { GraphQLError } from 'graphql'
-import { authorizeUser } from 'src/utils/authHelpers'
+import { authorizeUser } from '../utils/authHelpers'
 import { ConcertPosterService } from '../services'
 
 const concertPosterResolvers: Resolvers = {

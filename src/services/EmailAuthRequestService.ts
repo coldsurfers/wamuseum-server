@@ -1,4 +1,4 @@
-import EmailAuthRequestDTO from 'src/dtos/EmailAuthRequestDTO'
+import EmailAuthRequestDTO from '../dtos/EmailAuthRequestDTO'
 
 class EmailAuthRequestService {
   public static async create(data: {

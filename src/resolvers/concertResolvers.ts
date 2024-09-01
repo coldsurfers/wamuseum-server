@@ -1,4 +1,4 @@
-import { authorizeUser } from 'src/utils/authHelpers'
+import { authorizeUser } from '../utils/authHelpers'
 import { ConcertService } from '../services'
 import { Resolvers } from '../../gql/resolvers-types'
 

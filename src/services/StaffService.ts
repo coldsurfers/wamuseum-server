@@ -1,4 +1,4 @@
-import StaffDTO from 'src/dtos/StaffDTO'
+import StaffDTO from '../dtos/StaffDTO'
 
 class StaffService {
   public static async getStaffByUserId(userId: number) {

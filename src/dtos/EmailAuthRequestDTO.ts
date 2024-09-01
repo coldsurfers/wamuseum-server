@@ -1,5 +1,5 @@
 import { EmailAuthRequest } from 'gql/resolvers-types'
-import EmailAuthRequestModel from 'src/models/email-auth-request'
+import EmailAuthRequestModel from '../models/email-auth-request'
 
 export default class EmailAuthRequestDTO {
   id?: string

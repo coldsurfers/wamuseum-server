@@ -1,5 +1,5 @@
 import { User } from 'gql/resolvers-types'
-import { UserModel } from 'src/models/user'
+import { UserModel } from '../models/user'
 
 export default class UserDTO {
   id?: number

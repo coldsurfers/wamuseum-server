@@ -1,7 +1,7 @@
 import { GraphqlContext } from 'gql/Context'
 import { GraphQLError } from 'graphql'
-import StaffDTO from 'src/dtos/StaffDTO'
-import UserDTO from 'src/dtos/UserDTO'
+import StaffDTO from '../dtos/StaffDTO'
+import UserDTO from '../dtos/UserDTO'
 import { StaffService, UserService } from '../services'
 
 export async function authorizeUser(
