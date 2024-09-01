@@ -1,11 +1,12 @@
+import UserDTO from 'src/dtos/UserDTO'
 import { UserModel } from '../models/user'
 import { User as UserResolverType } from '../../gql/resolvers-types'
 
 class UserService {
   static async getUserById(id: number): Promise<UserResolverType | null> {
-    const user = await UserModel.findById(id)
-    if (!user) return null
-    const { email, id: userId, createdAt, password, passwordSalt } = user
+    const userDTO = await UserDTO.findById(id)
+    if (!userDTO) return null
+    const { email, id: userId, createdAt, password, passwordSalt } = userDTO
     return {
       __typename: 'User',
       email,
