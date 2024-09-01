@@ -1,12 +1,12 @@
 import { isAfter, addMinutes } from 'date-fns'
 import { GraphQLError } from 'graphql'
+import concertCategoryResolvers from 'src/resolvers/concertCategoryResolvers'
 import concertResolvers from '../src/resolvers/concertResolvers'
 import authResolvers from '../src/resolvers/authResolvers'
 import {
   ConcertPosterService,
   EmailAuthRequestService,
   ConcertTicketService,
-  ConcertCategoryService,
   UserService,
   StaffService,
 } from '../src/services'
@@ -18,65 +18,13 @@ const resolvers: Resolvers = {
   Query: {
     ...userResolvers.Query,
     ...concertResolvers.Query,
-    concertCategory: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-
-      const concertCategory =
-        await ConcertCategoryService.getConcertCategoryById(args.id)
-      if (!concertCategory) {
-        return {
-          __typename: 'HttpError',
-          code: 404,
-          message: '해당하는 콘서트 카테고리가 없습니다.',
-        }
-      }
-      return concertCategory
-    },
-    concertCategoryList: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const list = await ConcertCategoryService.getAllConcertCategories()
-      return {
-        list,
-        __typename: 'ConcertCategoryList',
-      }
-    },
+    ...concertCategoryResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,
     ...authResolvers.Mutation,
     ...concertResolvers.Mutation,
+    ...concertCategoryResolvers.Mutation,
     createEmailAuthRequest: async (parent, args) => {
       const { email } = args.input
       const createdEmailAuthRequest = await EmailAuthRequestService.create({
@@ -140,29 +88,7 @@ const resolvers: Resolvers = {
         message: '유효하지 않은 인증번호 입니다.',
       }
     },
-    createConcertCategory: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
 
-      const { title } = args.input
-      const concertCategory = await ConcertCategoryService.create({ title })
-      return concertCategory
-    },
     updateConcertTicket: async (parent, args, ctx) => {
       const user = await UserService.getUserByAccessToken(ctx.token ?? '')
       if (!user) {
