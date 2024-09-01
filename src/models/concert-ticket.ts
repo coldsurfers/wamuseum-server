@@ -20,6 +20,9 @@ class ConcertTicketModel {
       where: {
         concertId,
       },
+      include: {
+        ticketPrices: true,
+      },
     })
 
     return tickets.map((ticket) => new ConcertTicketModel(ticket))

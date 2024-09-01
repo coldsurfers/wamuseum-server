@@ -1,19 +1,11 @@
-import ConcertTicketModel from '../models/concert-ticket'
-import { ConcertTicket as ConcertTicketResolverType } from '../../gql/resolvers-types'
+import ConcertTicketDTO from '../dtos/ConcertTicketDTO'
 
 export default class ConcertTicketService {
   public static async getListByConcertId(
     concertId: string
-  ): Promise<ConcertTicketResolverType[]> {
-    const list = await ConcertTicketModel.findTicketsByConcertId(concertId)
-    return list.map(({ id, openDate, seller, sellingURL, ticketPrices }) => ({
-      __typename: 'ConcertTicket',
-      id,
-      openDate: openDate.toISOString(),
-      seller,
-      sellingURL,
-      ticketPrices: ticketPrices ?? [],
-    }))
+  ): Promise<ConcertTicketDTO[]> {
+    const list = await ConcertTicketDTO.findTickets(concertId)
+    return list
   }
 
   public static async updateById(
@@ -23,22 +15,12 @@ export default class ConcertTicketService {
       seller?: string
       sellingURL?: string
     }
-  ): Promise<ConcertTicketResolverType> {
-    const {
-      id: updatedId,
-      openDate,
-      seller,
-      sellingURL,
-      ticketPrices,
-    } = await ConcertTicketModel.update(id, data)
+  ): Promise<ConcertTicketDTO> {
+    const concertTicketDTO = new ConcertTicketDTO({
+      id,
+    })
+    const updated = await concertTicketDTO.update(id, data)
 
-    return {
-      __typename: 'ConcertTicket',
-      id: updatedId,
-      openDate: openDate.toISOString(),
-      seller,
-      sellingURL,
-      ticketPrices: ticketPrices ?? [],
-    }
+    return updated
   }
 }
