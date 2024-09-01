@@ -1,42 +1,26 @@
 import { GraphQLError } from 'graphql'
 import { isAfter, addMinutes } from 'date-fns'
+import { authorizeUser } from 'src/utils/authHelpers'
 import { generateToken } from '../utils/generateToken'
 import encryptPassword from '../utils/encryptPassword'
 import { Resolvers } from '../../gql/resolvers-types'
-import {
-  AuthTokenService,
-  EmailAuthRequestService,
-  StaffService,
-  UserService,
-} from '../services'
+import { AuthTokenService, EmailAuthRequestService } from '../services'
 import { sendEmail } from '../utils/mailer'
 
 const authResolvers: Resolvers = {
   Mutation: {
-    login: async (parent, args) => {
+    login: async (parent, args, ctx) => {
       const { email, password } = args.input
-      const user = await UserService.getUserByEmail(email)
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
+      const { user: authorizedUser, staff: authorizedStaff } =
+        await authorizeUser(ctx, {
+          email,
+          requiredRole: 'staff',
         })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
       const { encrypted } = encryptPassword({
         plain: password,
-        originalSalt: user.passwordSalt ?? undefined,
+        originalSalt: authorizedUser.passwordSalt ?? undefined,
       })
-      if (encrypted !== user.password) {
+      if (encrypted !== authorizedUser.password) {
         return {
           __typename: 'HttpError',
           code: 401,
@@ -45,33 +29,26 @@ const authResolvers: Resolvers = {
       }
       const authToken = await AuthTokenService.create({
         access_token: generateToken({
-          id: user.id,
+          id: authorizedUser.id,
         }),
         refresh_token: generateToken({
-          id: user.id,
+          id: authorizedUser.id,
         }),
-        user_id: user.id,
+        user_id: authorizedUser.id,
       })
       return {
         __typename: 'UserWithAuthToken',
         user: {
-          id: user.id,
-          email: user.email,
-          isAdmin: staff.isAuthorized,
+          id: authorizedUser.id,
+          email: authorizedUser.email,
+          isAdmin: authorizedStaff?.isAuthorized,
           __typename: 'User',
         },
         authToken,
       }
     },
     logout: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
+      const { user } = await authorizeUser(ctx, { requiredRole: 'staff' })
       const authToken = await AuthTokenService.findByUserId(user.id)
       if (!authToken) {
         throw new GraphQLError('권한이 없습니다', {
