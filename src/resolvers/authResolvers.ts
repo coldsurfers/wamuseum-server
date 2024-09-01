@@ -84,7 +84,7 @@ const authResolvers: Resolvers = {
           },
         },
       })
-      return createdEmailAuthRequest
+      return createdEmailAuthRequest.serialize()
     },
     authenticateEmailAuthRequest: async (parent, args) => {
       const { email, authcode } = args.input
@@ -103,6 +103,13 @@ const authResolvers: Resolvers = {
           message: '이미 인증 되었습니다.',
         }
       }
+      if (!latest.createdAt) {
+        return {
+          __typename: 'HttpError',
+          code: 400,
+          message: 'invalid createdAt value',
+        }
+      }
       if (
         isAfter(
           new Date(latest.createdAt),
@@ -116,12 +123,20 @@ const authResolvers: Resolvers = {
         }
       }
 
+      if (!latest.id) {
+        return {
+          __typename: 'HttpError',
+          code: 400,
+          message: 'invalid id value',
+        }
+      }
+
       if (authcode === latest.authcode) {
         const result = await EmailAuthRequestService.updateAuthenticatedById(
           latest.id,
           true
         )
-        return result
+        return result.serialize()
       }
 
       return {

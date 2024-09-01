@@ -1,60 +1,34 @@
-import EmailAuthRequestModel from '../models/email-auth-request'
-import { EmailAuthRequest as EmailAuthRequestResolverType } from '../../gql/resolvers-types'
+import EmailAuthRequestDTO from 'src/dtos/EmailAuthRequestDTO'
 
 class EmailAuthRequestService {
   public static async create(data: {
     email: string
-  }): Promise<EmailAuthRequestResolverType> {
-    const { createdAt, email, id, authcode } =
-      await EmailAuthRequestModel.create(data)
-
-    return {
-      __typename: 'EmailAuthRequest',
-      createdAt: createdAt.toISOString(),
-      email,
-      id,
-      authcode,
-    }
+  }): Promise<EmailAuthRequestDTO> {
+    const emailAuthDTO = new EmailAuthRequestDTO(data)
+    const created = await emailAuthDTO.create()
+    return created
   }
 
   public static async getLatestByEmail(
     email: string
-  ): Promise<EmailAuthRequestResolverType | null> {
-    const emailAuthRequest = await EmailAuthRequestModel.findLatest(email)
-    if (!emailAuthRequest) return null
-    const { createdAt, email: lastestEmail, id, authcode } = emailAuthRequest
-    return {
-      __typename: 'EmailAuthRequest',
-      createdAt: createdAt.toISOString(),
-      email: lastestEmail,
-      id,
-      authcode,
-    }
+  ): Promise<EmailAuthRequestDTO | null> {
+    const emailAuthDTO = await EmailAuthRequestDTO.findLatest(email)
+    return emailAuthDTO
   }
 
   public static async updateAuthenticatedById(
     id: string,
     authenticated: boolean
-  ): Promise<EmailAuthRequestResolverType> {
-    const updated = await EmailAuthRequestModel.updateAuthenticatedById(
+  ): Promise<EmailAuthRequestDTO> {
+    const emailAuthDTO = new EmailAuthRequestDTO({
       id,
-      authenticated
-    )
-    const {
-      createdAt,
-      email: lastestEmail,
-      id: updatedId,
-      authcode,
-      authenticated: updatedAuthenticated,
-    } = updated
-    return {
-      __typename: 'EmailAuthRequest',
-      createdAt: createdAt.toISOString(),
-      email: lastestEmail,
-      id: updatedId,
-      authcode,
-      authenticated: updatedAuthenticated,
-    }
+      authenticated,
+    })
+    const updated = await emailAuthDTO.update({
+      id,
+      authenticated,
+    })
+    return updated
   }
 }
 
