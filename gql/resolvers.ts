@@ -1,12 +1,12 @@
 import { isAfter, addMinutes } from 'date-fns'
 import { GraphQLError } from 'graphql'
 import concertCategoryResolvers from 'src/resolvers/concertCategoryResolvers'
+import concertTicketResolvers from 'src/resolvers/concertTicketResolvers'
 import concertResolvers from '../src/resolvers/concertResolvers'
 import authResolvers from '../src/resolvers/authResolvers'
 import {
   ConcertPosterService,
   EmailAuthRequestService,
-  ConcertTicketService,
   UserService,
   StaffService,
 } from '../src/services'
@@ -25,6 +25,7 @@ const resolvers: Resolvers = {
     ...authResolvers.Mutation,
     ...concertResolvers.Mutation,
     ...concertCategoryResolvers.Mutation,
+    ...concertTicketResolvers.Mutation,
     createEmailAuthRequest: async (parent, args) => {
       const { email } = args.input
       const createdEmailAuthRequest = await EmailAuthRequestService.create({
@@ -87,33 +88,6 @@ const resolvers: Resolvers = {
         code: 401,
         message: '유효하지 않은 인증번호 입니다.',
       }
-    },
-
-    updateConcertTicket: async (parent, args, ctx) => {
-      const user = await UserService.getUserByAccessToken(ctx.token ?? '')
-      if (!user) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id: userId } = user
-      const staff = await StaffService.getStaffByUserId(userId)
-      if (!staff) {
-        throw new GraphQLError('권한이 없습니다', {
-          extensions: {
-            code: 401,
-          },
-        })
-      }
-      const { id, openDate, seller, sellingURL } = args.input
-      const updated = await ConcertTicketService.updateById(id, {
-        openDate: openDate ? new Date(openDate) : undefined,
-        seller: seller ?? undefined,
-        sellingURL: sellingURL ?? undefined,
-      })
-      return updated
     },
     createConcertPoster: async (parent, args, ctx) => {
       const user = await UserService.getUserByAccessToken(ctx.token ?? '')
