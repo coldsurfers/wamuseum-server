@@ -12,7 +12,7 @@ const concertTicketResolvers: Resolvers = {
         seller: seller ?? undefined,
         sellingURL: sellingURL ?? undefined,
       })
-      return updated
+      return updated.serialize()
     },
   },
 }
