@@ -2,7 +2,6 @@ import { GraphqlContext } from 'gql/Context'
 import { GraphQLError } from 'graphql'
 import StaffDTO from '../dtos/StaffDTO'
 import UserDTO from '../dtos/UserDTO'
-import { StaffService, UserService } from '../services'
 
 export async function authorizeUser(
   ctx: GraphqlContext,
@@ -15,7 +14,7 @@ export async function authorizeUser(
   let user: UserDTO | null = null
 
   if (email) {
-    user = await UserService.getUserByEmail(email)
+    user = await UserDTO.find({ email })
     if (!user) {
       throw new GraphQLError('권한이 없습니다', {
         extensions: {
@@ -24,7 +23,7 @@ export async function authorizeUser(
       })
     }
   } else {
-    user = await UserService.getUserByAccessToken(ctx.token ?? '')
+    user = await UserDTO.find({ accessToken: ctx.token })
     if (!user) {
       throw new GraphQLError('권한이 없습니다', {
         extensions: {
@@ -34,7 +33,7 @@ export async function authorizeUser(
     }
   }
 
-  const { id: userId } = user
+  const { id: userId } = user.props
 
   if (!userId) {
     throw new GraphQLError('권한이 없습니다', {
@@ -48,8 +47,8 @@ export async function authorizeUser(
   let staff: StaffDTO | null = null
   if (requiredRole) {
     if (requiredRole === 'staff') {
-      staff = await StaffService.getStaffByUserId(userId)
-      if (!staff || !staff.isAuthorized) {
+      staff = await StaffDTO.find({ userId })
+      if (!staff || !staff.props.isAuthorized) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
             code: 401,

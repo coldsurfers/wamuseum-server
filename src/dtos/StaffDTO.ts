@@ -1,32 +1,27 @@
-import StaffModel from '../models/staff'
+import { Staff } from '@prisma/client'
+import { prisma } from '..'
 
 export default class StaffDTO {
-  id?: number
+  props: Partial<Staff>
 
-  userId?: number
-
-  isAuthorized?: boolean
-
-  constructor({
-    id,
-    isAuthorized,
-    userId,
-  }: {
-    id?: number
-    isAuthorized?: boolean
-    userId?: number
-  }) {
-    this.id = id
-    this.isAuthorized = isAuthorized
-    this.userId = userId
+  constructor(props: Partial<Staff>) {
+    this.props = props
   }
 
-  static async find({ userId }: { userId: number }) {
-    const data = await StaffModel.findByUserId(userId)
-    return new StaffDTO({
-      id: data?.id,
-      userId: data?.userId,
-      isAuthorized: data?.isAuthorized,
+  static async find({ userId }: { userId: string }) {
+    const data = await prisma.staff.findFirst({
+      where: {
+        users: {
+          every: {
+            userId,
+          },
+        },
+      },
+      include: {
+        users: true,
+      },
     })
+    if (!data) return null
+    return new StaffDTO(data)
   }
 }

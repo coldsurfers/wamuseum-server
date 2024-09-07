@@ -1,6 +1,6 @@
 const typeDefs = `#graphql
   type User {
-    id: Int!
+    id: String!
     email: String!
     isAdmin: Boolean
     createdAt: String
@@ -26,30 +26,21 @@ const typeDefs = `#graphql
     authcode: String!
   }
 
-  type ConcertCategory {
-    id: Int!
-    title: String!
+  type Artist {
+    id: String!
+    name: String!
   }
 
   type Concert {
     id: String!
-    concertCategory: ConcertCategory!
-    artist: String
     title: String!
-    location: String
-    date: String
-    posters: [ConcertPoster]
-    tickets: [ConcertTicket]
+    date: String!
     createdAt: String!
     updatedAt: String
   }
 
   type ConcertList {
     list: [Concert]
-  }
-
-  type ConcertCategoryList {
-    list: [ConcertCategory]
   }
 
   type Pagination {
@@ -62,24 +53,23 @@ const typeDefs = `#graphql
     pagination: Pagination
   }
 
-  type ConcertPoster {
+  type Poster {
     id: String!
     imageURL: String!
   }
 
-  type ConcertTicketPrice {
+  type Price {
     id: String!
     price: Float!
     title: String!
     priceCurrency: String!
   }
 
-  type ConcertTicket {
+  type Ticket {
     id: String!
     openDate: String!
     seller: String!
     sellingURL: String!
-    ticketPrices: [ConcertTicketPrice!]!
   }
 
   input CreateUserInput {
@@ -111,24 +101,14 @@ const typeDefs = `#graphql
   }
 
   input CreateConcertInput {
-    concertCategoryId: Int!
-    artist: String!
     title: String!
-    location: String!
     date: String!
-    posterURLs: [String!]!
-    tickets: [CreateConcertConcertTicketInput!]!
   }
 
   input UpdateConcertInput {
     id: String!
-    artist: String!
     title: String!
-    location: String!
     date: String!
-    posterURLs: [String!]
-    tickets: [CreateConcertConcertTicketInput!]
-    concertCategoryId: Int!
   }
 
   input RemoveConcertInput {
@@ -157,10 +137,6 @@ const typeDefs = `#graphql
     imageURL: String!
   }
 
-  input CreateConcertCategoryInput {
-    title: String!
-  }
-
   type HttpError {
     code: Int!
     message: String!
@@ -182,21 +158,13 @@ const typeDefs = `#graphql
 
   union UpdateConcertData = Concert | HttpError
 
-  type RemovedConcert {
-    id: String!
-  }
+  union RemoveConcertData = Concert | HttpError
 
-  union RemoveConcertData = RemovedConcert | HttpError
+  union UpdateConcertTicketData = Ticket | HttpError
 
-  union UpdateConcertTicketData = ConcertTicket | HttpError
+  union UpdateConcertPosterData = Poster | HttpError
 
-  union UpdateConcertPosterData = ConcertPoster | HttpError
-
-  union CreateConcertPosterData = ConcertPoster | HttpError
-
-  union ConcertCategoryData = ConcertCategory | HttpError
-
-  union ConcertCategoryListData = ConcertCategoryList | HttpError
+  union CreateConcertPosterData = Poster | HttpError
 
   input ConcertListOrderBy {
     createdAt: String!
@@ -215,10 +183,6 @@ const typeDefs = `#graphql
     concert(
       id: String!
     ): ConcertData
-    concertCategory(
-      id: Int!
-    ): ConcertCategoryData
-    concertCategoryList: ConcertCategoryListData
   }
 
   type Mutation {
@@ -235,9 +199,6 @@ const typeDefs = `#graphql
       input: LoginInput!
     ): LoginData
     logout: User!
-    createConcertCategory(
-      input: CreateConcertCategoryInput!
-    ): ConcertCategoryData
     createConcert(
       input: CreateConcertInput!
     ): CreateConcertData

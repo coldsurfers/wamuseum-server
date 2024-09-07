@@ -1,64 +1,13 @@
-import { ConcertCategory, ConcertPoster, ConcertTicket } from '@prisma/client'
-import { Concert } from 'gql/resolvers-types'
+import { Concert as ConcertResolverType } from 'gql/resolvers-types'
+import { Concert } from '@prisma/client'
+import { GraphQLError } from 'graphql'
 import { prisma } from '..'
 
 export default class ConcertDTO {
-  id: string
+  props: Partial<Concert>
 
-  artist?: string
-
-  title: string
-
-  location?: string
-
-  date?: Date
-
-  html?: string
-
-  concertCategory: ConcertCategory
-
-  posters: ConcertPoster[]
-
-  tickets: ConcertTicket[]
-
-  createdAt?: Date
-
-  updatedAt?: Date
-
-  constructor(data: {
-    id: string
-
-    artist?: string
-
-    title: string
-
-    location?: string
-
-    date?: Date
-
-    html?: string
-
-    concertCategory: ConcertCategory
-
-    posters: ConcertPoster[]
-
-    tickets: ConcertTicket[]
-
-    createdAt?: Date
-
-    updatedAt?: Date
-  }) {
-    this.id = data.id
-    this.artist = data.artist
-    this.title = data.title
-    this.location = data.location
-    this.date = data.date
-    this.html = data.html
-    this.concertCategory = data.concertCategory
-    this.posters = data.posters
-    this.tickets = data.tickets
-    this.createdAt = data.createdAt
-    this.updatedAt = data.updatedAt
+  constructor(props: Partial<Concert>) {
+    this.props = props
   }
 
   static async findById(id: string) {
@@ -66,38 +15,54 @@ export default class ConcertDTO {
       where: {
         id,
       },
-      include: {
-        posters: true,
-        tickets: {
-          include: {
-            ticketPrices: true,
-          },
-        },
-        concertCategory: true,
-      },
     })
     if (!concert) return null
-    return new ConcertDTO({
-      ...concert,
-      artist: concert.artist ?? undefined,
-      location: concert.location ?? undefined,
-      date: concert.date ?? undefined,
-      html: concert.html ?? undefined,
-      updatedAt: concert.updatedAt ?? undefined,
+    return new ConcertDTO(concert)
+  }
+
+  async create() {
+    const { title, date } = this.props
+    if (!title || !date) {
+      throw new GraphQLError('invalid title or date')
+    }
+    const created = await prisma.concert.create({
+      data: {
+        title,
+        date,
+      },
+    })
+    return new ConcertDTO(created)
+  }
+
+  async update({ title, date }: { title: string; date: string }) {
+    const data = await prisma.concert.update({
+      where: {
+        id: this.props.id,
+      },
+      data: {
+        title,
+        date,
+      },
+    })
+    return new ConcertDTO(data)
+  }
+
+  async delete() {
+    await prisma.concert.delete({
+      where: {
+        id: this.props.id,
+      },
     })
   }
 
-  serialize(): Concert {
+  serialize(): ConcertResolverType {
     return {
       __typename: 'Concert',
-      id: this.id,
-      title: this.title,
-      concertCategory: this.concertCategory ?? {
-        __typename: 'ConcertCategory',
-        id: 0,
-        title: '',
-      },
-      createdAt: this.createdAt?.toISOString() ?? '',
+      createdAt: this.props.createdAt?.toISOString() ?? '',
+      date: this.props.date?.toISOString() ?? '',
+      id: this.props.id ?? '',
+      title: this.props.title ?? '',
+      updatedAt: this.props.updatedAt?.toISOString() ?? '',
     }
   }
 }
