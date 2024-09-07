@@ -1,16 +1,18 @@
 import { Resolvers } from 'gql/resolvers-types'
 import { GraphQLError } from 'graphql'
 import { authorizeUser } from '../utils/authHelpers'
-import { ConcertPosterService } from '../services'
+import PosterDTO from '../dtos/PosterDTO'
 
 const concertPosterResolvers: Resolvers = {
   Mutation: {
     createConcertPoster: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
       const { concertId, imageURL } = args.input
-      const poster = await ConcertPosterService.create({
-        concertId,
+      const posterDTO = new PosterDTO({
         imageURL,
+      })
+      const poster = await posterDTO.create({
+        concertId,
       })
       if (!poster) {
         return {
@@ -19,7 +21,7 @@ const concertPosterResolvers: Resolvers = {
           message: 'Internal Server Error',
         }
       }
-      return poster
+      return poster.serialize()
     },
     updateConcertPoster: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
@@ -31,11 +33,11 @@ const concertPosterResolvers: Resolvers = {
           },
         })
       }
-      const updated = await ConcertPosterService.updateImageURLById(
+      const posterDTO = new PosterDTO({
         id,
-        imageURL
-      )
-      return updated
+      })
+      const updated = await posterDTO.update({ imageURL })
+      return updated.serialize()
     },
   },
 }

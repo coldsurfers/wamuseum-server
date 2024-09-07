@@ -1,132 +1,56 @@
-import { User } from 'gql/resolvers-types'
-import { UserModel } from '../models/user'
+import { User } from '@prisma/client'
+import { User as UserResolverType } from 'gql/resolvers-types'
+import { prisma } from '..'
 
 export default class UserDTO {
-  id?: number
+  props: Partial<User>
 
-  email: string
-
-  createdAt?: Date
-
-  password?: string
-
-  passwordSalt?: string
-
-  provider?: string
-
-  constructor(params: {
-    id?: number
-    email: string
-    createdAt?: Date
-    password?: string
-    passwordSalt?: string
-    provider?: string
-  }) {
-    const { id, email, createdAt, password, passwordSalt, provider } = params
-    this.id = id
-    this.email = email
-    this.createdAt = createdAt
-    this.password = password
-    this.passwordSalt = passwordSalt
-    this.provider = provider
+  constructor(props: Partial<User>) {
+    this.props = props
   }
 
   static async find(params: {
-    id?: number
+    id?: string
     email?: string
     accessToken?: string
   }) {
-    const { id, email, accessToken } = params
-    if (typeof id === 'number') {
-      const prismaUser = await UserModel.findById(id)
-      if (!prismaUser) return null
-      const {
-        id: userId,
-        email: userEmail,
-        createdAt,
-        password,
-        passwordSalt,
-      } = prismaUser
-      return new UserDTO({
-        id: userId,
-        email: userEmail,
-        createdAt,
-        password: password ?? '',
-        passwordSalt: passwordSalt ?? '',
-      })
-    }
-    if (email) {
-      const prismaUser = await UserModel.findByEmail(email)
-      if (!prismaUser) return null
-      const {
-        id: userId,
-        email: userEmail,
-        createdAt,
-        password,
-        passwordSalt,
-      } = prismaUser
-      return new UserDTO({
-        id: userId,
-        email: userEmail,
-        createdAt,
-        password: password ?? '',
-        passwordSalt: passwordSalt ?? '',
-      })
-    }
-
-    if (accessToken) {
-      const prismaUser = await UserModel.findByAccessToken(accessToken)
-      if (!prismaUser) return null
-      const {
-        id: userId,
-        email: userEmail,
-        createdAt,
-        password,
-        passwordSalt,
-      } = prismaUser
-      return new UserDTO({
-        id: userId,
-        email: userEmail,
-        createdAt,
-        password: password ?? '',
-        passwordSalt: passwordSalt ?? '',
-      })
-    }
-    return null
+    const data = await prisma.user.findFirst({
+      where: {
+        id: params.id,
+        email: params.email,
+        auth_token: {
+          every: {
+            access_token: params.accessToken,
+          },
+        },
+      },
+    })
+    if (!data) return null
+    return new UserDTO(data)
   }
 
   async create() {
-    if (!this.provider) {
-      throw Error('provider value is invalid')
+    if (!this.props.provider || !this.props.email) {
+      throw Error('provider value or email value is invalid')
     }
-    const created = await UserModel.create({
-      email: this.email,
-      password: this.password,
-      passwordSalt: this.passwordSalt,
-      provider: this.provider,
+    const created = await prisma.user.create({
+      data: {
+        email: this.props.email,
+        password: this.props.password,
+        passwordSalt: this.props.passwordSalt,
+        provider: this.props.provider,
+      },
     })
-    const {
-      id: userId,
-      email: userEmail,
-      createdAt,
-      password,
-      passwordSalt,
-    } = created
-    return new UserDTO({
-      id: userId,
-      email: userEmail,
-      createdAt,
-      password: password ?? '',
-      passwordSalt: passwordSalt ?? '',
-    })
+
+    return new UserDTO(created)
   }
 
-  serialize(): User {
+  serialize(): UserResolverType {
     return {
       __typename: 'User',
-      createdAt: this.createdAt?.toISOString(),
-      email: this.email,
-      id: this.id ?? 0,
+      createdAt: this.props.createdAt?.toISOString(),
+      email: this.props.email ?? '',
+      id: this.props.id ?? '',
     }
   }
 }

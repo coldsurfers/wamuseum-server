@@ -2,24 +2,14 @@ import { VercelApiHandler, VercelRequest, VercelResponse } from '@vercel/node'
 import { S3Client } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import allowVercelCors from '../../src/utils/allowVercelCors'
-import { StaffService, UserService } from '../../src/services'
+import { authorizeUser } from '../../src/utils/authHelpers'
 
 const handler: VercelApiHandler = async (
   req: VercelRequest,
   res: VercelResponse
 ) => {
   const { authorization } = req.headers
-
-  const user = await UserService.getUserByAccessToken(authorization ?? '')
-  if (!user || !user.id) {
-    res.status(401).send({})
-    return
-  }
-  const staff = await StaffService.getStaffByUserId(user.id)
-  if (!staff) {
-    res.status(403).send({})
-    return
-  }
+  await authorizeUser({ token: authorization }, { requiredRole: 'staff' })
 
   const s3Client = new S3Client({
     region: process.env.S3_REGION,

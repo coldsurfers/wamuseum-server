@@ -1,57 +1,63 @@
 import { GraphQLError } from 'graphql'
 import { isAfter, addMinutes } from 'date-fns'
+import UserWithAuthTokenDTO from '../dtos/UserWithAuthTokenDTO'
+import EmailAuthRequestDTO from '../dtos/EmailAuthRequestDTO'
 import { authorizeUser } from '../utils/authHelpers'
 import { generateToken } from '../utils/generateToken'
 import encryptPassword from '../utils/encryptPassword'
 import { Resolvers } from '../../gql/resolvers-types'
-import { AuthTokenService, EmailAuthRequestService } from '../services'
 import { sendEmail } from '../utils/mailer'
 
 const authResolvers: Resolvers = {
   Mutation: {
     login: async (parent, args, ctx) => {
       const { email, password } = args.input
-      const { user: authorizedUser, staff: authorizedStaff } =
-        await authorizeUser(ctx, {
-          email,
-          requiredRole: 'staff',
-        })
+      const { user: authorizedUser } = await authorizeUser(ctx, {
+        email,
+        requiredRole: 'staff',
+      })
 
       const { encrypted } = encryptPassword({
         plain: password,
-        originalSalt: authorizedUser.passwordSalt ?? undefined,
+        originalSalt: authorizedUser.props.passwordSalt ?? undefined,
       })
-      if (encrypted !== authorizedUser.password) {
+      if (encrypted !== authorizedUser.props.password) {
         return {
           __typename: 'HttpError',
           code: 401,
           message: '이메일이나 비밀번호가 일치하지 않습니다.',
         }
       }
-      const authToken = await AuthTokenService.create({
+      if (!authorizedUser.props.id) {
+        throw new GraphQLError('not found user id', {
+          extensions: {
+            code: 404,
+          },
+        })
+      }
+      const userWithAuthTokenDTO = new UserWithAuthTokenDTO({
         access_token: generateToken({
-          id: authorizedUser.id ?? 0,
+          id: authorizedUser.props.id,
         }),
         refresh_token: generateToken({
-          id: authorizedUser.id ?? 0,
+          id: authorizedUser.props.id,
         }),
-        user_id: authorizedUser.id ?? 0,
       })
-      const serializedUser = authorizedUser.serialize()
-      return {
-        __typename: 'UserWithAuthToken',
-        user: {
-          id: serializedUser.id,
-          email: serializedUser.email,
-          isAdmin: authorizedStaff?.isAuthorized,
-          __typename: 'User',
-        },
-        authToken,
-      }
+      const created = await userWithAuthTokenDTO.create({
+        userId: authorizedUser.props.id,
+      })
+      return created.serialize()
     },
     logout: async (parent, args, ctx) => {
       const { user } = await authorizeUser(ctx, { requiredRole: 'staff' })
-      const authToken = await AuthTokenService.findByUserId(user.id ?? 0)
+      if (!user.props.id) {
+        throw new GraphQLError('not found user id', {
+          extensions: {
+            code: 404,
+          },
+        })
+      }
+      const authToken = await UserWithAuthTokenDTO.findByUserId(user.props.id)
       if (!authToken) {
         throw new GraphQLError('권한이 없습니다', {
           extensions: {
@@ -59,23 +65,19 @@ const authResolvers: Resolvers = {
           },
         })
       }
-      await AuthTokenService.delete({ id: authToken.id })
-      const serializedUser = user.serialize()
-      return {
-        __typename: 'User',
-        id: serializedUser.id,
-        email: serializedUser.email,
-      }
+      await authToken.delete()
+      return user.serialize()
     },
     createEmailAuthRequest: async (parent, args) => {
       const { email } = args.input
-      const createdEmailAuthRequest = await EmailAuthRequestService.create({
+      const emailAuthRequestDTO = new EmailAuthRequestDTO({
         email,
       })
+      const createdEmailAuthRequest = await emailAuthRequestDTO.create()
       await sendEmail({
-        to: createdEmailAuthRequest.email,
+        to: createdEmailAuthRequest.props.email,
         subject: 'Wamuseum 이메일 인증 번호',
-        html: `Wamuseum의 이메일 인증 번호는 ${createdEmailAuthRequest.authcode}입니다. 3분내에 입력 해 주세요.`,
+        html: `Wamuseum의 이메일 인증 번호는 ${createdEmailAuthRequest.props.authcode}입니다. 3분내에 입력 해 주세요.`,
         smtpOptions: {
           service: process.env.MAILER_SERVICE,
           auth: {
@@ -88,7 +90,7 @@ const authResolvers: Resolvers = {
     },
     authenticateEmailAuthRequest: async (parent, args) => {
       const { email, authcode } = args.input
-      const latest = await EmailAuthRequestService.getLatestByEmail(email)
+      const latest = await EmailAuthRequestDTO.findLatest(email)
       if (!latest) {
         return {
           __typename: 'HttpError',
@@ -96,14 +98,14 @@ const authResolvers: Resolvers = {
           message: '이메일 인증 요청을 다시 시도해주세요.',
         }
       }
-      if (latest.authenticated) {
+      if (latest.props.authenticated) {
         return {
           __typename: 'HttpError',
           code: 409,
           message: '이미 인증 되었습니다.',
         }
       }
-      if (!latest.createdAt) {
+      if (!latest.props.createdAt) {
         return {
           __typename: 'HttpError',
           code: 400,
@@ -112,8 +114,8 @@ const authResolvers: Resolvers = {
       }
       if (
         isAfter(
-          new Date(latest.createdAt),
-          addMinutes(new Date(latest.createdAt), 3)
+          new Date(latest.props.createdAt),
+          addMinutes(new Date(latest.props.createdAt), 3)
         )
       ) {
         return {
@@ -123,7 +125,7 @@ const authResolvers: Resolvers = {
         }
       }
 
-      if (!latest.id) {
+      if (!latest.props.id) {
         return {
           __typename: 'HttpError',
           code: 400,
@@ -131,11 +133,11 @@ const authResolvers: Resolvers = {
         }
       }
 
-      if (authcode === latest.authcode) {
-        const result = await EmailAuthRequestService.updateAuthenticatedById(
-          latest.id,
-          true
-        )
+      if (authcode === latest.props.authcode) {
+        const result = await latest.update({
+          authenticated: true,
+          id: latest.props.id,
+        })
         return result.serialize()
       }
 

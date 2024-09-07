@@ -1,123 +1,68 @@
+import ConcertListPaginationDTO from '../dtos/ConcertListWithPaginationDTO'
+import ConcertDTO from '../dtos/ConcertDTO'
 import { authorizeUser } from '../utils/authHelpers'
-import { ConcertService } from '../services'
 import { Resolvers } from '../../gql/resolvers-types'
 
 const concertResolvers: Resolvers = {
   Query: {
     concert: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
-      const concert = await ConcertService.getConcertById(args.id)
+      const concertDTO = await ConcertDTO.findById(args.id)
 
-      if (!concert)
+      if (!concertDTO)
         return {
           __typename: 'HttpError',
           code: 404,
           message: '콘서트가 존재하지 않습니다.',
         }
 
-      return concert.serialize()
+      return concertDTO.serialize()
     },
     concertList: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
       const { page, limit, orderBy } = args
-      const concerts = await ConcertService.getList({
+      const concertListPaginationDTO = await ConcertListPaginationDTO.list({
         page,
         limit,
         orderBy: {
           createdAt: orderBy.createdAt as 'asc' | 'desc',
         },
       })
-      const count = await ConcertService.getAllCount()
-      return {
-        __typename: 'ConcertListWithPagination',
-        list: {
-          __typename: 'ConcertList',
-          list: concerts,
-        },
-        pagination: {
-          __typename: 'Pagination',
-          current: page,
-          count: Math.ceil(count / limit),
-        },
-      }
+      const count = await ConcertListPaginationDTO.count()
+      return concertListPaginationDTO.serialize(page, count, limit)
     },
   },
   Mutation: {
     createConcert: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
-      const {
-        concertCategoryId,
-        artist,
-        date,
+      const { date, title } = args.input
+      const concertDTO = new ConcertDTO({
         title,
-        tickets,
-        posterURLs,
-        location,
-      } = args.input
-      const concert = await ConcertService.create({
-        concertCategoryId,
-        artist,
-        location,
         date: new Date(date),
-        title,
-        tickets: tickets.map((ticket) => ({
-          ...ticket,
-          openDate: new Date(ticket.openDate),
-        })),
-        posters: posterURLs.map((url) => ({
-          imageURL: url,
-        })),
       })
-
-      return concert
+      const concert = await concertDTO.create()
+      return concert.serialize()
     },
     updateConcert: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
-      const {
+      const { id, date, title } = args.input
+      const concertDTO = new ConcertDTO({
         id,
-        artist,
-        date,
-        title,
-        posterURLs,
-        tickets,
-        concertCategoryId,
-        location,
-      } = args.input
-      const updated = await ConcertService.updateById(id, {
-        artist,
-        date: new Date(date),
-        title,
-        location,
-        posters: posterURLs
-          ? posterURLs.map((url) => ({
-              imageURL: url,
-            }))
-          : undefined,
-        tickets: tickets
-          ? tickets.map((ticket) => ({
-              ...ticket,
-              openDate: new Date(ticket.openDate),
-            }))
-          : undefined,
-        concertCategoryId,
       })
-
-      return updated
+      const updated = await concertDTO.update({ title, date })
+      return updated.serialize()
     },
     removeConcert: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
-      const existing = await ConcertService.getConcertById(args.input.id)
+      const existing = await ConcertDTO.findById(args.input.id)
       if (!existing)
         return {
           __typename: 'HttpError',
           code: 404,
           message: '콘서트가 존재하지 않습니다.',
         }
-      const removed = await ConcertService.deleteById(args.input.id)
-      return {
-        id: removed.id,
-        __typename: 'RemovedConcert',
-      }
+      await existing.delete()
+      return existing.serialize()
     },
   },
 }

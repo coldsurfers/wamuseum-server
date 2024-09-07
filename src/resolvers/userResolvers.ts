@@ -1,8 +1,8 @@
 import { CredentialsProviderSchema } from '@coldsurfers/zod-schema'
 import { z } from 'zod'
+import UserDTO from '../dtos/UserDTO'
 import { authorizeUser } from '../utils/authHelpers'
 import { Resolvers } from '../../gql/resolvers-types'
-import { UserService } from '../services'
 import { validateCreateUser } from '../utils/validate'
 import encryptPassword from '../utils/encryptPassword'
 
@@ -56,7 +56,7 @@ const userResolvers: Resolvers = {
         }
       }
 
-      const existing = await UserService.getUserByEmail(email)
+      const existing = await UserDTO.find({ email })
       if (existing) {
         return {
           __typename: 'HttpError',
@@ -69,7 +69,7 @@ const userResolvers: Resolvers = {
         originalSalt: undefined,
       })
 
-      const createdUser = await UserService.createUser({
+      const userDTO = new UserDTO({
         email: args.input.email,
         password: encrypted,
         passwordSalt: salt,
@@ -77,7 +77,9 @@ const userResolvers: Resolvers = {
           typeof CredentialsProviderSchema
         >,
       })
-      if (!createdUser.id) {
+
+      const createdUser = await userDTO.create()
+      if (!createdUser.props.id) {
         return {
           __typename: 'HttpError',
           code: 500,

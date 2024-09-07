@@ -1,91 +1,83 @@
-import { EmailAuthRequest } from 'gql/resolvers-types'
-import EmailAuthRequestModel from '../models/email-auth-request'
+import { EmailAuthRequest as EmailAuthRequestResolverType } from 'gql/resolvers-types'
+import { EmailAuthRequest } from '@prisma/client'
+import { createEmailAuthCode } from '../utils/createEmailAuthcode'
+import { prisma } from '..'
 
 export default class EmailAuthRequestDTO {
-  id?: string
+  props: Partial<EmailAuthRequest>
 
-  email?: string
-
-  authcode?: string
-
-  authenticated?: boolean
-
-  createdAt?: Date
-
-  constructor({
-    id,
-    email,
-    authcode,
-    authenticated,
-    createdAt,
-  }: {
-    id?: string
-    email?: string
-    authcode?: string
-    authenticated?: boolean
-    createdAt?: Date
-  }) {
-    this.id = id
-    this.email = email
-    this.authcode = authcode
-    this.createdAt = createdAt
-    this.authenticated = authenticated
+  constructor(props: Partial<EmailAuthRequest>) {
+    this.props = props
   }
 
   async create() {
-    if (!this.email) {
+    if (!this.props.email) {
       throw Error('invalid email value')
     }
-    const created = await EmailAuthRequestModel.create({
-      email: this.email,
+    const created = await prisma.emailAuthRequest.create({
+      data: {
+        email: this.props.email,
+        authcode: createEmailAuthCode(),
+      },
+      select: {
+        id: true,
+        email: true,
+        authcode: true,
+        createdAt: true,
+      },
     })
     return new EmailAuthRequestDTO(created)
   }
 
   static async findLatest(email: string) {
-    const data = await EmailAuthRequestModel.findLatest(email)
-    if (!data) {
-      return null
-    }
-    const { id, authcode, authenticated, createdAt, email: dataEmail } = data
-    return new EmailAuthRequestDTO({
-      id,
-      authcode,
-      authenticated,
-      createdAt,
-      email: dataEmail,
+    const result = await prisma.emailAuthRequest.findFirst({
+      where: {
+        email,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        authcode: true,
+        authenticated: true,
+        createdAt: true,
+        email: true,
+        authenticatedAt: true,
+      },
     })
+    if (!result) return null
+    return new EmailAuthRequestDTO(result)
   }
 
   async update({ id, authenticated }: { id: string; authenticated: boolean }) {
-    const data = await EmailAuthRequestModel.updateAuthenticatedById(
-      id,
-      authenticated
-    )
-    const {
-      id: dataId,
-      authcode,
-      authenticated: dataAuthenticated,
-      createdAt,
-      email: dataEmail,
-    } = data
-    return new EmailAuthRequestDTO({
-      id: dataId,
-      authcode,
-      authenticated: dataAuthenticated,
-      createdAt,
-      email: dataEmail,
+    const updated = await prisma.emailAuthRequest.update({
+      where: {
+        id,
+      },
+      data: {
+        authenticated,
+      },
+      select: {
+        id: true,
+        authcode: true,
+        authenticated: true,
+        createdAt: true,
+        email: true,
+        authenticatedAt: true,
+      },
     })
+    return new EmailAuthRequestDTO(updated)
   }
 
-  serialize(): EmailAuthRequest {
+  serialize(): EmailAuthRequestResolverType {
     return {
       __typename: 'EmailAuthRequest',
-      authcode: this.authcode ?? '',
-      authenticated: this.authenticated,
-      createdAt: this.createdAt?.toISOString() ?? '',
-      email: this.email ?? '',
-      id: this.id ?? '',
+      authcode: this.props.authcode ?? '',
+      authenticated: this.props.authenticated,
+      createdAt: this.props.createdAt?.toISOString() ?? '',
+      email: this.props.email ?? '',
+      id: this.props.id ?? '',
     }
   }
 }
