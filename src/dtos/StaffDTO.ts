@@ -12,7 +12,7 @@ export default class StaffDTO {
     const data = await prisma.staff.findFirst({
       where: {
         users: {
-          every: {
+          some: {
             userId,
           },
         },

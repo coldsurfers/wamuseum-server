@@ -19,7 +19,7 @@ export default class UserDTO {
         id: params.id,
         email: params.email,
         auth_token: {
-          every: {
+          some: {
             access_token: params.accessToken,
           },
         },
