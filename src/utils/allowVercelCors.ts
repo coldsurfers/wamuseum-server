@@ -7,6 +7,7 @@ const allowVercelCors =
     if (process.env.npm_lifecycle_event === 'debug') {
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
     } else {
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
       res.setHeader(
         'Access-Control-Allow-Origin',
         'https://billets-admin.coldsurf.io'
