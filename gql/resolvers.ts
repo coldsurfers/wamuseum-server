@@ -1,3 +1,4 @@
+import artistResolvers from '../src/resolvers/artistResolvers'
 import concertTicketResolvers from '../src/resolvers/concertTicketResolvers'
 import concertPosterResolvers from '../src/resolvers/concertPosterResolvers'
 import concertResolvers from '../src/resolvers/concertResolvers'
@@ -9,6 +10,8 @@ const resolvers: Resolvers = {
   Query: {
     ...userResolvers.Query,
     ...concertResolvers.Query,
+    ...concertPosterResolvers.Query,
+    ...artistResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,
@@ -16,6 +19,7 @@ const resolvers: Resolvers = {
     ...concertResolvers.Mutation,
     ...concertTicketResolvers.Mutation,
     ...concertPosterResolvers.Mutation,
+    ...artistResolvers.Mutation,
   },
 }
 

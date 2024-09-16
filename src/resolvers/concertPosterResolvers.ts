@@ -4,6 +4,17 @@ import { authorizeUser } from '../utils/authHelpers'
 import PosterDTO from '../dtos/PosterDTO'
 
 const concertPosterResolvers: Resolvers = {
+  Query: {
+    concertPoster: async (parent, args) => {
+      const { concertId } = args
+      const dtos = await PosterDTO.findByConcertId(concertId)
+
+      return {
+        __typename: 'PosterList',
+        list: dtos.map((dto) => dto.serialize()),
+      }
+    },
+  },
   Mutation: {
     createConcertPoster: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })

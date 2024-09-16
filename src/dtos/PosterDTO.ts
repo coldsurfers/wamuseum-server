@@ -11,6 +11,19 @@ export default class PosterDTO {
     this.props = props
   }
 
+  static async findByConcertId(concertId: string) {
+    const posters = await prisma.poster.findMany({
+      where: {
+        concerts: {
+          some: {
+            concertId,
+          },
+        },
+      },
+    })
+    return posters.map((poster) => new PosterDTO(poster))
+  }
+
   async create({ concertId }: { concertId: string }) {
     if (!this.props.imageURL) {
       throw Error('image url is invalid')

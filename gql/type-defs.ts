@@ -149,6 +149,14 @@ const typeDefs = `#graphql
     message: String!
   }
 
+  type PosterList {
+    list: [Poster]
+  }
+
+  type ArtistList {
+    list: [Artist]
+  }
+
   union AuthenticateEmailAuthRequestData = EmailAuthRequest | HttpError
 
   union CreateUserData = User | HttpError
@@ -156,6 +164,8 @@ const typeDefs = `#graphql
   union LoginData = UserWithAuthToken | HttpError
 
   union ConcertListData = ConcertListWithPagination | HttpError
+
+  union ConcertPosterData = PosterList | HttpError
 
   union UserData = User | HttpError
 
@@ -175,8 +185,25 @@ const typeDefs = `#graphql
 
   union CreateConcertPosterData = Poster | HttpError
 
+  union CreateArtistData = Artist | HttpError
+
+  union SearchArtistsData = ArtistList | HttpError
+
+  union ConcertArtistData = ArtistList | HttpError
+
+  union CreateConcertArtistData = Artist | HttpError
+
   input ConcertListOrderBy {
     createdAt: String!
+  }
+
+  input CreateArtistInput {
+    artistName: String!
+  }
+
+  input CreateConcertArtistInput {
+    artistId: String!
+    concertId: String!
   }
 
   type Query {
@@ -192,6 +219,15 @@ const typeDefs = `#graphql
     concert(
       id: String!
     ): ConcertData
+    concertArtists(
+      concertId: String!
+    ): ConcertArtistData
+    concertPoster(
+      concertId: String!
+    ): ConcertPosterData
+    searchArtists(
+      keyword: String!
+    ): SearchArtistsData
   }
 
   type Mutation {
@@ -229,6 +265,12 @@ const typeDefs = `#graphql
     updateConcertPoster(
       input: UpdateConcertPosterInput!
     ): UpdateConcertPosterData
+    createArtist(
+      input: CreateArtistInput!
+    ): CreateArtistData
+    createConcertArtist(
+      input: CreateConcertArtistInput!
+    ): CreateConcertArtistData
   }
 `
 
