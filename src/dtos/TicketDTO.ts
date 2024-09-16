@@ -22,6 +22,27 @@ export default class TicketDTO {
     return data.map((item) => new TicketDTO(item))
   }
 
+  async create({ concertId }: { concertId: string }) {
+    if (!this.props.openDate || !this.props.seller || !this.props.sellingURL) {
+      throw Error('invalid openDate, seller, sellingURL')
+    }
+    const ticket = await prisma.ticket.create({
+      data: {
+        openDate: this.props.openDate,
+        seller: this.props.seller,
+        sellingURL: this.props.sellingURL,
+      },
+    })
+    await prisma.concertsOnTickets.create({
+      data: {
+        concertId,
+        ticketId: ticket.id,
+      },
+    })
+
+    return new TicketDTO(ticket)
+  }
+
   async update(data: {
     openDate?: Date
     seller?: string

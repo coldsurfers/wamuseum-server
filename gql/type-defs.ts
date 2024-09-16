@@ -115,6 +115,13 @@ const typeDefs = `#graphql
     id: String!
   }
 
+  input CreateConcertTicketInput {
+    concertId: String!
+    openDate: String!
+    seller: String!
+    sellingURL: String!
+  }
+
   input UpdateConcertTicketInput {
     id: String!
     openDate: String
@@ -159,6 +166,8 @@ const typeDefs = `#graphql
   union UpdateConcertData = Concert | HttpError
 
   union RemoveConcertData = Concert | HttpError
+
+  union CreateConcertTicketData = Ticket | HttpError
 
   union UpdateConcertTicketData = Ticket | HttpError
 
@@ -208,6 +217,9 @@ const typeDefs = `#graphql
     removeConcert(
       input: RemoveConcertInput!
     ): RemoveConcertData
+    createConcertTicket(
+      input: CreateConcertTicketInput!
+    ): CreateConcertTicketData
     updateConcertTicket(
       input: UpdateConcertTicketInput!
     ): UpdateConcertTicketData

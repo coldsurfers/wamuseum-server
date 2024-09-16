@@ -89,6 +89,15 @@ export type CreateConcertPosterInput = {
   imageURL: Scalars['String'];
 };
 
+export type CreateConcertTicketData = HttpError | Ticket;
+
+export type CreateConcertTicketInput = {
+  concertId: Scalars['String'];
+  openDate: Scalars['String'];
+  seller: Scalars['String'];
+  sellingURL: Scalars['String'];
+};
+
 export type CreateEmailAuthRequestInput = {
   email: Scalars['String'];
 };
@@ -128,6 +137,7 @@ export type Mutation = {
   authenticateEmailAuthRequest?: Maybe<AuthenticateEmailAuthRequestData>;
   createConcert?: Maybe<CreateConcertData>;
   createConcertPoster?: Maybe<CreateConcertPosterData>;
+  createConcertTicket?: Maybe<CreateConcertTicketData>;
   createEmailAuthRequest?: Maybe<EmailAuthRequest>;
   createUser?: Maybe<CreateUserData>;
   login?: Maybe<LoginData>;
@@ -151,6 +161,11 @@ export type MutationCreateConcertArgs = {
 
 export type MutationCreateConcertPosterArgs = {
   input: CreateConcertPosterInput;
+};
+
+
+export type MutationCreateConcertTicketArgs = {
+  input: CreateConcertTicketInput;
 };
 
 
@@ -375,6 +390,8 @@ export type ResolversTypes = {
   CreateConcertInput: CreateConcertInput;
   CreateConcertPosterData: ResolversTypes['HttpError'] | ResolversTypes['Poster'];
   CreateConcertPosterInput: CreateConcertPosterInput;
+  CreateConcertTicketData: ResolversTypes['HttpError'] | ResolversTypes['Ticket'];
+  CreateConcertTicketInput: CreateConcertTicketInput;
   CreateEmailAuthRequestInput: CreateEmailAuthRequestInput;
   CreateUserData: ResolversTypes['HttpError'] | ResolversTypes['User'];
   CreateUserInput: CreateUserInput;
@@ -423,6 +440,8 @@ export type ResolversParentTypes = {
   CreateConcertInput: CreateConcertInput;
   CreateConcertPosterData: ResolversParentTypes['HttpError'] | ResolversParentTypes['Poster'];
   CreateConcertPosterInput: CreateConcertPosterInput;
+  CreateConcertTicketData: ResolversParentTypes['HttpError'] | ResolversParentTypes['Ticket'];
+  CreateConcertTicketInput: CreateConcertTicketInput;
   CreateEmailAuthRequestInput: CreateEmailAuthRequestInput;
   CreateUserData: ResolversParentTypes['HttpError'] | ResolversParentTypes['User'];
   CreateUserInput: CreateUserInput;
@@ -504,6 +523,10 @@ export type CreateConcertPosterDataResolvers<ContextType = GraphqlContext, Paren
   __resolveType: TypeResolveFn<'HttpError' | 'Poster', ParentType, ContextType>;
 };
 
+export type CreateConcertTicketDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['CreateConcertTicketData'] = ResolversParentTypes['CreateConcertTicketData']> = {
+  __resolveType: TypeResolveFn<'HttpError' | 'Ticket', ParentType, ContextType>;
+};
+
 export type CreateUserDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['CreateUserData'] = ResolversParentTypes['CreateUserData']> = {
   __resolveType: TypeResolveFn<'HttpError' | 'User', ParentType, ContextType>;
 };
@@ -531,6 +554,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   authenticateEmailAuthRequest?: Resolver<Maybe<ResolversTypes['AuthenticateEmailAuthRequestData']>, ParentType, ContextType, RequireFields<MutationAuthenticateEmailAuthRequestArgs, 'input'>>;
   createConcert?: Resolver<Maybe<ResolversTypes['CreateConcertData']>, ParentType, ContextType, RequireFields<MutationCreateConcertArgs, 'input'>>;
   createConcertPoster?: Resolver<Maybe<ResolversTypes['CreateConcertPosterData']>, ParentType, ContextType, RequireFields<MutationCreateConcertPosterArgs, 'input'>>;
+  createConcertTicket?: Resolver<Maybe<ResolversTypes['CreateConcertTicketData']>, ParentType, ContextType, RequireFields<MutationCreateConcertTicketArgs, 'input'>>;
   createEmailAuthRequest?: Resolver<Maybe<ResolversTypes['EmailAuthRequest']>, ParentType, ContextType, RequireFields<MutationCreateEmailAuthRequestArgs, 'input'>>;
   createUser?: Resolver<Maybe<ResolversTypes['CreateUserData']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginData']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;
@@ -623,6 +647,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   ConcertListWithPagination?: ConcertListWithPaginationResolvers<ContextType>;
   CreateConcertData?: CreateConcertDataResolvers<ContextType>;
   CreateConcertPosterData?: CreateConcertPosterDataResolvers<ContextType>;
+  CreateConcertTicketData?: CreateConcertTicketDataResolvers<ContextType>;
   CreateUserData?: CreateUserDataResolvers<ContextType>;
   EmailAuthRequest?: EmailAuthRequestResolvers<ContextType>;
   HttpError?: HttpErrorResolvers<ContextType>;
