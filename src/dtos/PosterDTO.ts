@@ -25,8 +25,14 @@ export default class PosterDTO {
         concertId,
         posterId: poster.id,
       },
+      include: {
+        poster: true,
+      },
     })
-    return new PosterDTO(created)
+    return new PosterDTO({
+      id: created.poster.id,
+      imageURL: created.poster.imageURL,
+    })
   }
 
   async update(data: { imageURL: string }) {
