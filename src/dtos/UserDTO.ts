@@ -9,18 +9,24 @@ export default class UserDTO {
     this.props = props
   }
 
-  static async find(params: {
-    id?: string
-    email?: string
-    accessToken?: string
-  }) {
+  static async findByEmail(email: string) {
     const data = await prisma.user.findFirst({
       where: {
-        id: params.id,
-        email: params.email,
+        email,
+      },
+    })
+    if (!data) return null
+    return new UserDTO(data)
+  }
+
+  static async findByAccessToken(accessToken: string) {
+    const data = await prisma.user.findFirst({
+      where: {
         auth_token: {
           some: {
-            access_token: params.accessToken,
+            access_token: {
+              equals: accessToken,
+            },
           },
         },
       },

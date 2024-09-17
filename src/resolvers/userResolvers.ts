@@ -56,7 +56,7 @@ const userResolvers: Resolvers = {
         }
       }
 
-      const existing = await UserDTO.find({ email })
+      const existing = await UserDTO.findByEmail(email)
       if (existing) {
         return {
           __typename: 'HttpError',
