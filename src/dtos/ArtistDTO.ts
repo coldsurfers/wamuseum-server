@@ -2,7 +2,9 @@ import { Artist } from '@prisma/client'
 import { prisma } from '..'
 import { Artist as ArtistResolverType } from '../../gql/resolvers-types'
 
-type ArtistDTOProps = Partial<Artist>
+type ArtistDTOProps = Partial<Artist> & {
+  profileImageURL?: string
+}
 
 export default class ArtistDTO {
   props: ArtistDTOProps
@@ -45,6 +47,13 @@ export default class ArtistDTO {
     const artist = await prisma.artist.create({
       data: {
         name: this.props.name,
+        ...(this.props.profileImageURL && {
+          artistProfileImage: {
+            create: {
+              imageURL: this.props.profileImageURL,
+            },
+          },
+        }),
       },
     })
     return new ArtistDTO(artist)

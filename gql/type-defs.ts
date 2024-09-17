@@ -199,6 +199,7 @@ const typeDefs = `#graphql
 
   input CreateArtistInput {
     artistName: String!
+    imageURL: String!
   }
 
   input CreateConcertArtistInput {

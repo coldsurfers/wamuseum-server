@@ -27,6 +27,7 @@ const artistResolvers: Resolvers = {
       await authorizeUser(ctx, { requiredRole: 'staff' })
       const artistDTO = new ArtistDTO({
         name: args.input.artistName,
+        profileImageURL: args.input.imageURL,
       })
       const created = await artistDTO.create()
 
