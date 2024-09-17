@@ -14,7 +14,7 @@ export async function authorizeUser(
   let user: UserDTO | null = null
 
   if (email) {
-    user = await UserDTO.find({ email })
+    user = await UserDTO.findByEmail(email)
     if (!user) {
       throw new GraphQLError('권한이 없습니다', {
         extensions: {
@@ -23,7 +23,14 @@ export async function authorizeUser(
       })
     }
   } else {
-    user = await UserDTO.find({ accessToken: ctx.token })
+    if (!ctx.token) {
+      throw new GraphQLError('권한이 없습니다', {
+        extensions: {
+          code: 401,
+        },
+      })
+    }
+    user = await UserDTO.findByAccessToken(ctx.token)
     if (!user) {
       throw new GraphQLError('권한이 없습니다', {
         extensions: {

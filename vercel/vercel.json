@@ -1,11 +1,11 @@
 {
   "functions": {
     "api/graphql.ts": {
-      "memory": 512,
+      "memory": 1024,
       "maxDuration": 5
     },
-    "api/file-upload.ts": {
-      "memory": 512,
+    "api/presigned/poster-thumbnails.ts": {
+      "memory": 1024,
       "maxDuration": 5
     }
   }
