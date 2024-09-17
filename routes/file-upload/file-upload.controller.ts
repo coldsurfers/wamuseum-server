@@ -1,6 +1,7 @@
 import { RouteHandler } from 'fastify'
 import { S3Client } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+import { z } from 'zod'
 import { authorizeUser } from '../../src/utils/authHelpers'
 
 const getPosterThumbnailsPresigned: RouteHandler<{
@@ -10,8 +11,19 @@ const getPosterThumbnailsPresigned: RouteHandler<{
   }
 }> = async (req, rep) => {
   try {
+    const querystringSchema = z.object({
+      filename: z.string(),
+      filetype: z.string(),
+    })
+    const queryValidation = querystringSchema.safeParse(req.query)
+    if (!queryValidation.success) {
+      return rep.status(400).send()
+    }
+
     const { authorization } = req.headers
     await authorizeUser({ token: authorization }, { requiredRole: 'staff' })
+
+    const { filename, filetype } = queryValidation.data
 
     const s3Client = new S3Client({
       region: process.env.S3_REGION,
@@ -23,10 +35,10 @@ const getPosterThumbnailsPresigned: RouteHandler<{
 
     const post = await createPresignedPost(s3Client, {
       Bucket: process.env.FSTVLLIFE_ORIGIN_B ?? '',
-      Key: `billets/poster-thumbnails/${req.query.filename}` as string,
+      Key: `billets/poster-thumbnails/${filename}` as string,
       Fields: {
         acl: 'public-read',
-        'Content-Type': req.query.filetype as string,
+        'Content-Type': filetype as string,
       },
       Expires: 5, // seconds
       Conditions: [
@@ -47,8 +59,19 @@ const getArtistProfileImagesPresigned: RouteHandler<{
   }
 }> = async (req, rep) => {
   try {
+    const querystringSchema = z.object({
+      filename: z.string(),
+      filetype: z.string(),
+    })
+    const queryValidation = querystringSchema.safeParse(req.query)
+    if (!queryValidation.success) {
+      return rep.status(400).send()
+    }
+
     const { authorization } = req.headers
     await authorizeUser({ token: authorization }, { requiredRole: 'staff' })
+
+    const { filename, filetype } = queryValidation.data
 
     const s3Client = new S3Client({
       region: process.env.S3_REGION,
@@ -60,10 +83,10 @@ const getArtistProfileImagesPresigned: RouteHandler<{
 
     const post = await createPresignedPost(s3Client, {
       Bucket: process.env.FSTVLLIFE_ORIGIN_B ?? '',
-      Key: `billets/artist/profile-images/${req.query.filename}` as string,
+      Key: `billets/artist/profile-images/${filename}` as string,
       Fields: {
         acl: 'public-read',
-        'Content-Type': req.query.filetype as string,
+        'Content-Type': filetype as string,
       },
       Expires: 5, // seconds
       Conditions: [

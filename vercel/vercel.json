@@ -7,6 +7,10 @@
     "api/presigned/poster-thumbnails.ts": {
       "memory": 1024,
       "maxDuration": 5
+    },
+    "api/presigned/artist-profile-images.ts": {
+      "memory": 1024,
+      "maxDuration": 5
     }
   }
 }
