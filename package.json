@@ -26,7 +26,7 @@
     "@as-integrations/fastify": "^2.1.1",
     "@aws-sdk/client-s3": "^3.254.0",
     "@aws-sdk/s3-presigned-post": "^3.254.0",
-    "@coldsurfers/prisma-schema": "0.3.0",
+    "@coldsurfers/prisma-schema": "0.3.1-rc.3",
     "@coldsurfers/zod-schema": "^0.1.1-rc.1",
     "@fastify/cors": "^9.0.1",
     "@prisma/client": "5.8.0",
@@ -71,5 +71,6 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "5.3.3",
     "vercel": "^37.2.1"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
