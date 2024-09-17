@@ -24,6 +24,9 @@ export default class ConcertListWithPaginationDTO {
       skip: (page - 1) * limit,
       take: limit,
       orderBy,
+      where: {
+        deletedAt: null,
+      },
     })
     return new ConcertListWithPaginationDTO(
       data.map((item) => new ConcertDTO(item))

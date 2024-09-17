@@ -48,9 +48,12 @@ export default class ConcertDTO {
   }
 
   async delete() {
-    await prisma.concert.delete({
+    await prisma.concert.update({
       where: {
         id: this.props.id,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     })
   }
