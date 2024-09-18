@@ -42,6 +42,15 @@ const artistResolvers: Resolvers = {
       const connected = await dto.connect(concertId)
       return connected.serialize()
     },
+    removeConcertArtist: async (parent, args, ctx) => {
+      await authorizeUser(ctx, { requiredRole: 'staff' })
+      const { concertId, artistId } = args.input
+      const dto = new ArtistDTO({
+        id: artistId,
+      })
+      const removed = await dto.removeFromConcert({ concertId })
+      return removed.serialize()
+    },
   },
 }
 

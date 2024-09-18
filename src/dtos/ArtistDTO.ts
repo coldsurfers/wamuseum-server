@@ -80,6 +80,23 @@ export default class ArtistDTO {
     })
   }
 
+  async removeFromConcert({ concertId }: { concertId: string }) {
+    if (!this.props.id) {
+      throw Error('invalid id')
+    }
+    const data = await prisma.concertsOnArtists.delete({
+      where: {
+        concertId_artistId: {
+          concertId,
+          artistId: this.props.id,
+        },
+      },
+    })
+    return new ArtistDTO({
+      id: data.artistId,
+    })
+  }
+
   serialize(): ArtistResolverType {
     return {
       __typename: 'Artist',
