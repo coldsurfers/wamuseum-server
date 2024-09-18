@@ -213,6 +213,8 @@ const typeDefs = `#graphql
 
   union CreateVenueData = Venue | HttpError
 
+  union CreateConcertVenueData = Venue | HttpError
+
   input ConcertListOrderBy {
     createdAt: String!
   }
@@ -241,6 +243,11 @@ const typeDefs = `#graphql
     name: String!
     lat: Float!
     lng: Float!
+  }
+
+  input CreateConcertVenueInput {
+    concertId: String!
+    venueId: String!
   }
 
   type Query {
@@ -320,6 +327,9 @@ const typeDefs = `#graphql
     createVenue(
       input: CreateVenueInput!
     ): CreateVenueData
+    createConcertVenue(
+      input: CreateConcertVenueInput!
+    ): CreateConcertVenueData
   }
 `
 

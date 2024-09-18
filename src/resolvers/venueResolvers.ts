@@ -17,6 +17,14 @@ const venueResolvers: Resolvers = {
       const created = await dto.create()
       return created.serialize()
     },
+    createConcertVenue: async (parent, args, ctx) => {
+      await authorizeUser(ctx, { requiredRole: 'staff' })
+      const venueDTO = new VenueDTO({
+        id: args.input.venueId,
+      })
+      const connected = await venueDTO.connect(args.input.concertId)
+      return connected.serialize()
+    },
   },
 }
 
