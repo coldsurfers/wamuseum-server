@@ -201,6 +201,8 @@ const typeDefs = `#graphql
 
   union ConcertTicketsData = TicketList | HttpError
 
+  union RemoveConcertTicketData = Ticket | HttpError
+
   input ConcertListOrderBy {
     createdAt: String!
   }
@@ -218,6 +220,11 @@ const typeDefs = `#graphql
   input RemoveConcertArtistInput {
     artistId: String!
     concertId: String!
+  }
+
+  input RemoveConcertTicketInput {
+    concertId: String!
+    ticketId: String!
   }
 
   type Query {
@@ -276,6 +283,9 @@ const typeDefs = `#graphql
     updateConcertTicket(
       input: UpdateConcertTicketInput!
     ): UpdateConcertTicketData
+    removeConcertTicket(
+      input: RemoveConcertTicketInput!
+    ): RemoveConcertTicketData
     createConcertPoster(
       input: CreateConcertPosterInput!
     ): CreateConcertPosterData

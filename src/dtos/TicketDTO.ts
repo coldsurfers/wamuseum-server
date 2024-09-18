@@ -57,6 +57,23 @@ export default class TicketDTO {
     return new TicketDTO(updated)
   }
 
+  async delete({ concertId }: { concertId: string }) {
+    if (!this.props.id) {
+      throw Error('invalid id')
+    }
+    const data = await prisma.concertsOnTickets.delete({
+      where: {
+        concertId_ticketId: {
+          concertId,
+          ticketId: this.props.id,
+        },
+      },
+    })
+    return new TicketDTO({
+      id: data.ticketId,
+    })
+  }
+
   serialize(): TicketResolverType {
     return {
       __typename: 'Ticket',

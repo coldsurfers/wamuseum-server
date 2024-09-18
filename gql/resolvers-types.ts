@@ -171,6 +171,7 @@ export type Mutation = {
   logout: User;
   removeConcert?: Maybe<RemoveConcertData>;
   removeConcertArtist?: Maybe<RemoveConcertArtistData>;
+  removeConcertTicket?: Maybe<RemoveConcertTicketData>;
   updateConcert?: Maybe<UpdateConcertData>;
   updateConcertPoster?: Maybe<UpdateConcertPosterData>;
   updateConcertTicket?: Maybe<UpdateConcertTicketData>;
@@ -229,6 +230,11 @@ export type MutationRemoveConcertArgs = {
 
 export type MutationRemoveConcertArtistArgs = {
   input: RemoveConcertArtistInput;
+};
+
+
+export type MutationRemoveConcertTicketArgs = {
+  input: RemoveConcertTicketInput;
 };
 
 
@@ -331,6 +337,13 @@ export type RemoveConcertData = Concert | HttpError;
 
 export type RemoveConcertInput = {
   id: Scalars['String'];
+};
+
+export type RemoveConcertTicketData = HttpError | Ticket;
+
+export type RemoveConcertTicketInput = {
+  concertId: Scalars['String'];
+  ticketId: Scalars['String'];
 };
 
 export type SearchArtistsData = ArtistList | HttpError;
@@ -505,6 +518,8 @@ export type ResolversTypes = {
   RemoveConcertArtistInput: RemoveConcertArtistInput;
   RemoveConcertData: ResolversTypes['Concert'] | ResolversTypes['HttpError'];
   RemoveConcertInput: RemoveConcertInput;
+  RemoveConcertTicketData: ResolversTypes['HttpError'] | ResolversTypes['Ticket'];
+  RemoveConcertTicketInput: RemoveConcertTicketInput;
   SearchArtistsData: ResolversTypes['ArtistList'] | ResolversTypes['HttpError'];
   String: ResolverTypeWrapper<Scalars['String']>;
   Ticket: ResolverTypeWrapper<Ticket>;
@@ -568,6 +583,8 @@ export type ResolversParentTypes = {
   RemoveConcertArtistInput: RemoveConcertArtistInput;
   RemoveConcertData: ResolversParentTypes['Concert'] | ResolversParentTypes['HttpError'];
   RemoveConcertInput: RemoveConcertInput;
+  RemoveConcertTicketData: ResolversParentTypes['HttpError'] | ResolversParentTypes['Ticket'];
+  RemoveConcertTicketInput: RemoveConcertTicketInput;
   SearchArtistsData: ResolversParentTypes['ArtistList'] | ResolversParentTypes['HttpError'];
   String: Scalars['String'];
   Ticket: Ticket;
@@ -700,6 +717,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   logout?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   removeConcert?: Resolver<Maybe<ResolversTypes['RemoveConcertData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertArgs, 'input'>>;
   removeConcertArtist?: Resolver<Maybe<ResolversTypes['RemoveConcertArtistData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertArtistArgs, 'input'>>;
+  removeConcertTicket?: Resolver<Maybe<ResolversTypes['RemoveConcertTicketData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertTicketArgs, 'input'>>;
   updateConcert?: Resolver<Maybe<ResolversTypes['UpdateConcertData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertArgs, 'input'>>;
   updateConcertPoster?: Resolver<Maybe<ResolversTypes['UpdateConcertPosterData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertPosterArgs, 'input'>>;
   updateConcertTicket?: Resolver<Maybe<ResolversTypes['UpdateConcertTicketData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertTicketArgs, 'input'>>;
@@ -747,6 +765,10 @@ export type RemoveConcertArtistDataResolvers<ContextType = GraphqlContext, Paren
 
 export type RemoveConcertDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['RemoveConcertData'] = ResolversParentTypes['RemoveConcertData']> = {
   __resolveType: TypeResolveFn<'Concert' | 'HttpError', ParentType, ContextType>;
+};
+
+export type RemoveConcertTicketDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['RemoveConcertTicketData'] = ResolversParentTypes['RemoveConcertTicketData']> = {
+  __resolveType: TypeResolveFn<'HttpError' | 'Ticket', ParentType, ContextType>;
 };
 
 export type SearchArtistsDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['SearchArtistsData'] = ResolversParentTypes['SearchArtistsData']> = {
@@ -828,6 +850,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   Query?: QueryResolvers<ContextType>;
   RemoveConcertArtistData?: RemoveConcertArtistDataResolvers<ContextType>;
   RemoveConcertData?: RemoveConcertDataResolvers<ContextType>;
+  RemoveConcertTicketData?: RemoveConcertTicketDataResolvers<ContextType>;
   SearchArtistsData?: SearchArtistsDataResolvers<ContextType>;
   Ticket?: TicketResolvers<ContextType>;
   TicketList?: TicketListResolvers<ContextType>;

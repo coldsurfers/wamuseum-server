@@ -41,6 +41,15 @@ const concertTicketResolvers: Resolvers = {
       })
       return updated.serialize()
     },
+    removeConcertTicket: async (parent, args, ctx) => {
+      await authorizeUser(ctx, { requiredRole: 'staff' })
+      const { concertId, ticketId } = args.input
+      const dto = new TicketDTO({
+        id: ticketId,
+      })
+      const deleted = await dto.delete({ concertId })
+      return deleted.serialize()
+    },
   },
 }
 
