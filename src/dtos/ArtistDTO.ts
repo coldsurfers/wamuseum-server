@@ -69,8 +69,14 @@ export default class ArtistDTO {
         concertId,
       },
     })
+    const artist = await prisma.artist.findUnique({
+      where: {
+        id: data.artistId,
+      },
+    })
     return new ArtistDTO({
       id: data.artistId,
+      name: artist?.name,
     })
   }
 
