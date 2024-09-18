@@ -71,6 +71,8 @@ export type ConcertListWithPagination = {
 
 export type ConcertPosterData = HttpError | PosterList;
 
+export type ConcertTicketsData = HttpError | TicketList;
+
 export type CreateArtistData = Artist | HttpError;
 
 export type CreateArtistInput = {
@@ -275,6 +277,7 @@ export type Query = {
   concertArtists?: Maybe<ConcertArtistData>;
   concertList?: Maybe<ConcertListData>;
   concertPoster?: Maybe<ConcertPosterData>;
+  concertTickets?: Maybe<ConcertTicketsData>;
   me?: Maybe<UserData>;
   searchArtists?: Maybe<SearchArtistsData>;
   user?: Maybe<UserData>;
@@ -299,6 +302,11 @@ export type QueryConcertListArgs = {
 
 
 export type QueryConcertPosterArgs = {
+  concertId: Scalars['String'];
+};
+
+
+export type QueryConcertTicketsArgs = {
   concertId: Scalars['String'];
 };
 
@@ -333,6 +341,11 @@ export type Ticket = {
   openDate: Scalars['String'];
   seller: Scalars['String'];
   sellingURL: Scalars['String'];
+};
+
+export type TicketList = {
+  __typename?: 'TicketList';
+  list?: Maybe<Array<Maybe<Ticket>>>;
 };
 
 export type UpdateConcertData = Concert | HttpError;
@@ -460,6 +473,7 @@ export type ResolversTypes = {
   ConcertListOrderBy: ConcertListOrderBy;
   ConcertListWithPagination: ResolverTypeWrapper<ConcertListWithPagination>;
   ConcertPosterData: ResolversTypes['HttpError'] | ResolversTypes['PosterList'];
+  ConcertTicketsData: ResolversTypes['HttpError'] | ResolversTypes['TicketList'];
   CreateArtistData: ResolversTypes['Artist'] | ResolversTypes['HttpError'];
   CreateArtistInput: CreateArtistInput;
   CreateConcertArtistData: ResolversTypes['Artist'] | ResolversTypes['HttpError'];
@@ -494,6 +508,7 @@ export type ResolversTypes = {
   SearchArtistsData: ResolversTypes['ArtistList'] | ResolversTypes['HttpError'];
   String: ResolverTypeWrapper<Scalars['String']>;
   Ticket: ResolverTypeWrapper<Ticket>;
+  TicketList: ResolverTypeWrapper<TicketList>;
   UpdateConcertData: ResolversTypes['Concert'] | ResolversTypes['HttpError'];
   UpdateConcertInput: UpdateConcertInput;
   UpdateConcertPosterData: ResolversTypes['HttpError'] | ResolversTypes['Poster'];
@@ -521,6 +536,7 @@ export type ResolversParentTypes = {
   ConcertListOrderBy: ConcertListOrderBy;
   ConcertListWithPagination: ConcertListWithPagination;
   ConcertPosterData: ResolversParentTypes['HttpError'] | ResolversParentTypes['PosterList'];
+  ConcertTicketsData: ResolversParentTypes['HttpError'] | ResolversParentTypes['TicketList'];
   CreateArtistData: ResolversParentTypes['Artist'] | ResolversParentTypes['HttpError'];
   CreateArtistInput: CreateArtistInput;
   CreateConcertArtistData: ResolversParentTypes['Artist'] | ResolversParentTypes['HttpError'];
@@ -555,6 +571,7 @@ export type ResolversParentTypes = {
   SearchArtistsData: ResolversParentTypes['ArtistList'] | ResolversParentTypes['HttpError'];
   String: Scalars['String'];
   Ticket: Ticket;
+  TicketList: TicketList;
   UpdateConcertData: ResolversParentTypes['Concert'] | ResolversParentTypes['HttpError'];
   UpdateConcertInput: UpdateConcertInput;
   UpdateConcertPosterData: ResolversParentTypes['HttpError'] | ResolversParentTypes['Poster'];
@@ -621,6 +638,10 @@ export type ConcertListWithPaginationResolvers<ContextType = GraphqlContext, Par
 
 export type ConcertPosterDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['ConcertPosterData'] = ResolversParentTypes['ConcertPosterData']> = {
   __resolveType: TypeResolveFn<'HttpError' | 'PosterList', ParentType, ContextType>;
+};
+
+export type ConcertTicketsDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['ConcertTicketsData'] = ResolversParentTypes['ConcertTicketsData']> = {
+  __resolveType: TypeResolveFn<'HttpError' | 'TicketList', ParentType, ContextType>;
 };
 
 export type CreateArtistDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['CreateArtistData'] = ResolversParentTypes['CreateArtistData']> = {
@@ -714,6 +735,7 @@ export type QueryResolvers<ContextType = GraphqlContext, ParentType extends Reso
   concertArtists?: Resolver<Maybe<ResolversTypes['ConcertArtistData']>, ParentType, ContextType, RequireFields<QueryConcertArtistsArgs, 'concertId'>>;
   concertList?: Resolver<Maybe<ResolversTypes['ConcertListData']>, ParentType, ContextType, RequireFields<QueryConcertListArgs, 'limit' | 'orderBy' | 'page'>>;
   concertPoster?: Resolver<Maybe<ResolversTypes['ConcertPosterData']>, ParentType, ContextType, RequireFields<QueryConcertPosterArgs, 'concertId'>>;
+  concertTickets?: Resolver<Maybe<ResolversTypes['ConcertTicketsData']>, ParentType, ContextType, RequireFields<QueryConcertTicketsArgs, 'concertId'>>;
   me?: Resolver<Maybe<ResolversTypes['UserData']>, ParentType, ContextType>;
   searchArtists?: Resolver<Maybe<ResolversTypes['SearchArtistsData']>, ParentType, ContextType, RequireFields<QuerySearchArtistsArgs, 'keyword'>>;
   user?: Resolver<Maybe<ResolversTypes['UserData']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
@@ -736,6 +758,11 @@ export type TicketResolvers<ContextType = GraphqlContext, ParentType extends Res
   openDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   seller?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   sellingURL?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TicketListResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TicketList'] = ResolversParentTypes['TicketList']> = {
+  list?: Resolver<Maybe<Array<Maybe<ResolversTypes['Ticket']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -783,6 +810,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   ConcertListData?: ConcertListDataResolvers<ContextType>;
   ConcertListWithPagination?: ConcertListWithPaginationResolvers<ContextType>;
   ConcertPosterData?: ConcertPosterDataResolvers<ContextType>;
+  ConcertTicketsData?: ConcertTicketsDataResolvers<ContextType>;
   CreateArtistData?: CreateArtistDataResolvers<ContextType>;
   CreateConcertArtistData?: CreateConcertArtistDataResolvers<ContextType>;
   CreateConcertData?: CreateConcertDataResolvers<ContextType>;
@@ -802,6 +830,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   RemoveConcertData?: RemoveConcertDataResolvers<ContextType>;
   SearchArtistsData?: SearchArtistsDataResolvers<ContextType>;
   Ticket?: TicketResolvers<ContextType>;
+  TicketList?: TicketListResolvers<ContextType>;
   UpdateConcertData?: UpdateConcertDataResolvers<ContextType>;
   UpdateConcertPosterData?: UpdateConcertPosterDataResolvers<ContextType>;
   UpdateConcertTicketData?: UpdateConcertTicketDataResolvers<ContextType>;

@@ -3,6 +3,18 @@ import TicketDTO from '../dtos/TicketDTO'
 import { authorizeUser } from '../utils/authHelpers'
 
 const concertTicketResolvers: Resolvers = {
+  Query: {
+    concertTickets: async (parent, args, ctx) => {
+      await authorizeUser(ctx, { requiredRole: 'staff' })
+      const { concertId } = args
+      const dtos = await TicketDTO.findTickets(concertId)
+
+      return {
+        __typename: 'TicketList',
+        list: dtos.map((dto) => dto.serialize()),
+      }
+    },
+  },
   Mutation: {
     createConcertTicket: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })

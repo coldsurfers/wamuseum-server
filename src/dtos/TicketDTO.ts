@@ -13,7 +13,7 @@ export default class TicketDTO {
     const data = await prisma.ticket.findMany({
       where: {
         concerts: {
-          every: {
+          some: {
             concertId,
           },
         },
