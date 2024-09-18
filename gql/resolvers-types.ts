@@ -168,6 +168,7 @@ export type Mutation = {
   login?: Maybe<LoginData>;
   logout: User;
   removeConcert?: Maybe<RemoveConcertData>;
+  removeConcertArtist?: Maybe<RemoveConcertArtistData>;
   updateConcert?: Maybe<UpdateConcertData>;
   updateConcertPoster?: Maybe<UpdateConcertPosterData>;
   updateConcertTicket?: Maybe<UpdateConcertTicketData>;
@@ -221,6 +222,11 @@ export type MutationLoginArgs = {
 
 export type MutationRemoveConcertArgs = {
   input: RemoveConcertInput;
+};
+
+
+export type MutationRemoveConcertArtistArgs = {
+  input: RemoveConcertArtistInput;
 };
 
 
@@ -304,6 +310,13 @@ export type QuerySearchArtistsArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['Int'];
+};
+
+export type RemoveConcertArtistData = Artist | HttpError;
+
+export type RemoveConcertArtistInput = {
+  artistId: Scalars['String'];
+  concertId: Scalars['String'];
 };
 
 export type RemoveConcertData = Concert | HttpError;
@@ -474,6 +487,8 @@ export type ResolversTypes = {
   PosterList: ResolverTypeWrapper<PosterList>;
   Price: ResolverTypeWrapper<Price>;
   Query: ResolverTypeWrapper<{}>;
+  RemoveConcertArtistData: ResolversTypes['Artist'] | ResolversTypes['HttpError'];
+  RemoveConcertArtistInput: RemoveConcertArtistInput;
   RemoveConcertData: ResolversTypes['Concert'] | ResolversTypes['HttpError'];
   RemoveConcertInput: RemoveConcertInput;
   SearchArtistsData: ResolversTypes['ArtistList'] | ResolversTypes['HttpError'];
@@ -533,6 +548,8 @@ export type ResolversParentTypes = {
   PosterList: PosterList;
   Price: Price;
   Query: {};
+  RemoveConcertArtistData: ResolversParentTypes['Artist'] | ResolversParentTypes['HttpError'];
+  RemoveConcertArtistInput: RemoveConcertArtistInput;
   RemoveConcertData: ResolversParentTypes['Concert'] | ResolversParentTypes['HttpError'];
   RemoveConcertInput: RemoveConcertInput;
   SearchArtistsData: ResolversParentTypes['ArtistList'] | ResolversParentTypes['HttpError'];
@@ -661,6 +678,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   login?: Resolver<Maybe<ResolversTypes['LoginData']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;
   logout?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   removeConcert?: Resolver<Maybe<ResolversTypes['RemoveConcertData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertArgs, 'input'>>;
+  removeConcertArtist?: Resolver<Maybe<ResolversTypes['RemoveConcertArtistData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertArtistArgs, 'input'>>;
   updateConcert?: Resolver<Maybe<ResolversTypes['UpdateConcertData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertArgs, 'input'>>;
   updateConcertPoster?: Resolver<Maybe<ResolversTypes['UpdateConcertPosterData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertPosterArgs, 'input'>>;
   updateConcertTicket?: Resolver<Maybe<ResolversTypes['UpdateConcertTicketData']>, ParentType, ContextType, RequireFields<MutationUpdateConcertTicketArgs, 'input'>>;
@@ -699,6 +717,10 @@ export type QueryResolvers<ContextType = GraphqlContext, ParentType extends Reso
   me?: Resolver<Maybe<ResolversTypes['UserData']>, ParentType, ContextType>;
   searchArtists?: Resolver<Maybe<ResolversTypes['SearchArtistsData']>, ParentType, ContextType, RequireFields<QuerySearchArtistsArgs, 'keyword'>>;
   user?: Resolver<Maybe<ResolversTypes['UserData']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+};
+
+export type RemoveConcertArtistDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['RemoveConcertArtistData'] = ResolversParentTypes['RemoveConcertArtistData']> = {
+  __resolveType: TypeResolveFn<'Artist' | 'HttpError', ParentType, ContextType>;
 };
 
 export type RemoveConcertDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['RemoveConcertData'] = ResolversParentTypes['RemoveConcertData']> = {
@@ -776,6 +798,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   PosterList?: PosterListResolvers<ContextType>;
   Price?: PriceResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  RemoveConcertArtistData?: RemoveConcertArtistDataResolvers<ContextType>;
   RemoveConcertData?: RemoveConcertDataResolvers<ContextType>;
   SearchArtistsData?: SearchArtistsDataResolvers<ContextType>;
   Ticket?: TicketResolvers<ContextType>;

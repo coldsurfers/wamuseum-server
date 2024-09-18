@@ -193,6 +193,8 @@ const typeDefs = `#graphql
 
   union CreateConcertArtistData = Artist | HttpError
 
+  union RemoveConcertArtistData = Artist | HttpError
+
   input ConcertListOrderBy {
     createdAt: String!
   }
@@ -203,6 +205,11 @@ const typeDefs = `#graphql
   }
 
   input CreateConcertArtistInput {
+    artistId: String!
+    concertId: String!
+  }
+
+  input RemoveConcertArtistInput {
     artistId: String!
     concertId: String!
   }
@@ -272,6 +279,9 @@ const typeDefs = `#graphql
     createConcertArtist(
       input: CreateConcertArtistInput!
     ): CreateConcertArtistData
+    removeConcertArtist(
+      input: RemoveConcertArtistInput!
+    ): RemoveConcertArtistData
   }
 `
 
