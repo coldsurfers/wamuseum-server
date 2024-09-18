@@ -135,6 +135,14 @@ export type CreateUserInput = {
   passwordConfirm: Scalars['String'];
 };
 
+export type CreateVenueData = HttpError | Venue;
+
+export type CreateVenueInput = {
+  lat: Scalars['Float'];
+  lng: Scalars['Float'];
+  name: Scalars['String'];
+};
+
 export type EmailAuthRequest = {
   __typename?: 'EmailAuthRequest';
   authcode: Scalars['String'];
@@ -167,6 +175,7 @@ export type Mutation = {
   createConcertTicket?: Maybe<CreateConcertTicketData>;
   createEmailAuthRequest?: Maybe<EmailAuthRequest>;
   createUser?: Maybe<CreateUserData>;
+  createVenue?: Maybe<CreateVenueData>;
   login?: Maybe<LoginData>;
   logout: User;
   removeConcert?: Maybe<RemoveConcertData>;
@@ -215,6 +224,11 @@ export type MutationCreateEmailAuthRequestArgs = {
 
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
+};
+
+
+export type MutationCreateVenueArgs = {
+  input: CreateVenueInput;
 };
 
 
@@ -403,6 +417,15 @@ export type UserWithAuthToken = {
   user: User;
 };
 
+export type Venue = {
+  __typename?: 'Venue';
+  geohash: Scalars['String'];
+  id: Scalars['String'];
+  lat: Scalars['Float'];
+  lng: Scalars['Float'];
+  name: Scalars['String'];
+};
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -502,6 +525,8 @@ export type ResolversTypes = {
   CreateEmailAuthRequestInput: CreateEmailAuthRequestInput;
   CreateUserData: ResolversTypes['HttpError'] | ResolversTypes['User'];
   CreateUserInput: CreateUserInput;
+  CreateVenueData: ResolversTypes['HttpError'] | ResolversTypes['Venue'];
+  CreateVenueInput: CreateVenueInput;
   EmailAuthRequest: ResolverTypeWrapper<EmailAuthRequest>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   HttpError: ResolverTypeWrapper<HttpError>;
@@ -533,6 +558,7 @@ export type ResolversTypes = {
   User: ResolverTypeWrapper<User>;
   UserData: ResolversTypes['HttpError'] | ResolversTypes['User'];
   UserWithAuthToken: ResolverTypeWrapper<UserWithAuthToken>;
+  Venue: ResolverTypeWrapper<Venue>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -567,6 +593,8 @@ export type ResolversParentTypes = {
   CreateEmailAuthRequestInput: CreateEmailAuthRequestInput;
   CreateUserData: ResolversParentTypes['HttpError'] | ResolversParentTypes['User'];
   CreateUserInput: CreateUserInput;
+  CreateVenueData: ResolversParentTypes['HttpError'] | ResolversParentTypes['Venue'];
+  CreateVenueInput: CreateVenueInput;
   EmailAuthRequest: EmailAuthRequest;
   Float: Scalars['Float'];
   HttpError: HttpError;
@@ -598,6 +626,7 @@ export type ResolversParentTypes = {
   User: User;
   UserData: ResolversParentTypes['HttpError'] | ResolversParentTypes['User'];
   UserWithAuthToken: UserWithAuthToken;
+  Venue: Venue;
 };
 
 export type ArtistResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Artist'] = ResolversParentTypes['Artist']> = {
@@ -685,6 +714,10 @@ export type CreateUserDataResolvers<ContextType = GraphqlContext, ParentType ext
   __resolveType: TypeResolveFn<'HttpError' | 'User', ParentType, ContextType>;
 };
 
+export type CreateVenueDataResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['CreateVenueData'] = ResolversParentTypes['CreateVenueData']> = {
+  __resolveType: TypeResolveFn<'HttpError' | 'Venue', ParentType, ContextType>;
+};
+
 export type EmailAuthRequestResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['EmailAuthRequest'] = ResolversParentTypes['EmailAuthRequest']> = {
   authcode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   authenticated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -713,6 +746,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   createConcertTicket?: Resolver<Maybe<ResolversTypes['CreateConcertTicketData']>, ParentType, ContextType, RequireFields<MutationCreateConcertTicketArgs, 'input'>>;
   createEmailAuthRequest?: Resolver<Maybe<ResolversTypes['EmailAuthRequest']>, ParentType, ContextType, RequireFields<MutationCreateEmailAuthRequestArgs, 'input'>>;
   createUser?: Resolver<Maybe<ResolversTypes['CreateUserData']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
+  createVenue?: Resolver<Maybe<ResolversTypes['CreateVenueData']>, ParentType, ContextType, RequireFields<MutationCreateVenueArgs, 'input'>>;
   login?: Resolver<Maybe<ResolversTypes['LoginData']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;
   logout?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   removeConcert?: Resolver<Maybe<ResolversTypes['RemoveConcertData']>, ParentType, ContextType, RequireFields<MutationRemoveConcertArgs, 'input'>>;
@@ -820,6 +854,15 @@ export type UserWithAuthTokenResolvers<ContextType = GraphqlContext, ParentType 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type VenueResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Venue'] = ResolversParentTypes['Venue']> = {
+  geohash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  lat?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  lng?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = GraphqlContext> = {
   Artist?: ArtistResolvers<ContextType>;
   ArtistList?: ArtistListResolvers<ContextType>;
@@ -839,6 +882,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   CreateConcertPosterData?: CreateConcertPosterDataResolvers<ContextType>;
   CreateConcertTicketData?: CreateConcertTicketDataResolvers<ContextType>;
   CreateUserData?: CreateUserDataResolvers<ContextType>;
+  CreateVenueData?: CreateVenueDataResolvers<ContextType>;
   EmailAuthRequest?: EmailAuthRequestResolvers<ContextType>;
   HttpError?: HttpErrorResolvers<ContextType>;
   LoginData?: LoginDataResolvers<ContextType>;
@@ -860,5 +904,6 @@ export type Resolvers<ContextType = GraphqlContext> = {
   User?: UserResolvers<ContextType>;
   UserData?: UserDataResolvers<ContextType>;
   UserWithAuthToken?: UserWithAuthTokenResolvers<ContextType>;
+  Venue?: VenueResolvers<ContextType>;
 };
 

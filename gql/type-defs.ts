@@ -72,6 +72,14 @@ const typeDefs = `#graphql
     sellingURL: String!
   }
 
+  type Venue {
+    id: String!
+    name: String!
+    lat: Float!
+    lng: Float!
+    geohash: String!
+  }
+
   input CreateUserInput {
     email: String!
     password: String!
@@ -203,6 +211,8 @@ const typeDefs = `#graphql
 
   union RemoveConcertTicketData = Ticket | HttpError
 
+  union CreateVenueData = Venue | HttpError
+
   input ConcertListOrderBy {
     createdAt: String!
   }
@@ -225,6 +235,12 @@ const typeDefs = `#graphql
   input RemoveConcertTicketInput {
     concertId: String!
     ticketId: String!
+  }
+
+  input CreateVenueInput {
+    name: String!
+    lat: Float!
+    lng: Float!
   }
 
   type Query {
@@ -301,6 +317,9 @@ const typeDefs = `#graphql
     removeConcertArtist(
       input: RemoveConcertArtistInput!
     ): RemoveConcertArtistData
+    createVenue(
+      input: CreateVenueInput!
+    ): CreateVenueData
   }
 `
 
