@@ -72,6 +72,14 @@ const typeDefs = `#graphql
     sellingURL: String!
   }
 
+  type Venue {
+    id: String!
+    name: String!
+    lat: Float!
+    lng: Float!
+    geohash: String!
+  }
+
   input CreateUserInput {
     email: String!
     password: String!
@@ -161,6 +169,33 @@ const typeDefs = `#graphql
     list: [Ticket]
   }
 
+  type SearchedVenue {
+    address_name: String
+    category_group_code: String
+    category_group_name: String
+    category_name: String
+    distance: String
+    id: String
+    phone: String
+    place_name: String
+    place_url: String
+    road_address_name: String
+    x: String
+    y: String
+  }
+
+  type SearchedVenueList {
+    list: [SearchedVenue]
+  }
+
+  type SearchedConcertVenueList {
+    list: [Venue]
+  }
+
+  type ConcertVenueList {
+    list: [Venue]
+  }
+
   union AuthenticateEmailAuthRequestData = EmailAuthRequest | HttpError
 
   union CreateUserData = User | HttpError
@@ -203,6 +238,18 @@ const typeDefs = `#graphql
 
   union RemoveConcertTicketData = Ticket | HttpError
 
+  union CreateVenueData = Venue | HttpError
+
+  union CreateConcertVenueData = Venue | HttpError
+
+  union SearchVenueData = SearchedVenueList | HttpError
+
+  union SearchConcertVenueData = SearchedConcertVenueList | HttpError
+
+  union ConcertVenueData = ConcertVenueList | HttpError
+
+  union RemoveConcertVenueData = Venue | HttpError
+
   input ConcertListOrderBy {
     createdAt: String!
   }
@@ -227,6 +274,22 @@ const typeDefs = `#graphql
     ticketId: String!
   }
 
+  input CreateVenueInput {
+    name: String!
+    lat: Float!
+    lng: Float!
+  }
+
+  input CreateConcertVenueInput {
+    concertId: String!
+    venueId: String!
+  }
+
+  input RemoveConcertVenueInput {
+    concertId: String!
+    venueId: String!
+  }
+
   type Query {
     me: UserData
     user(
@@ -249,9 +312,18 @@ const typeDefs = `#graphql
     concertTickets(
       concertId: String!
     ): ConcertTicketsData
+    concertVenues(
+      concertId: String!
+    ): ConcertVenueData
     searchArtists(
       keyword: String!
     ): SearchArtistsData
+    searchVenue(
+      keyword: String!
+    ): SearchVenueData
+    searchConcertVenue(
+      keyword: String!
+    ): SearchConcertVenueData
   }
 
   type Mutation {
@@ -301,6 +373,15 @@ const typeDefs = `#graphql
     removeConcertArtist(
       input: RemoveConcertArtistInput!
     ): RemoveConcertArtistData
+    createVenue(
+      input: CreateVenueInput!
+    ): CreateVenueData
+    createConcertVenue(
+      input: CreateConcertVenueInput!
+    ): CreateConcertVenueData
+    removeConcertVenue(
+      input: RemoveConcertVenueInput!
+    ): RemoveConcertVenueData
   }
 `
 

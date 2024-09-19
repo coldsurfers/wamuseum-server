@@ -5,6 +5,7 @@ import concertResolvers from '../src/resolvers/concertResolvers'
 import authResolvers from '../src/resolvers/authResolvers'
 import { Resolvers } from './resolvers-types'
 import userResolvers from '../src/resolvers/userResolvers'
+import venueResolvers from '../src/resolvers/venueResolvers'
 
 const resolvers: Resolvers = {
   Query: {
@@ -13,6 +14,7 @@ const resolvers: Resolvers = {
     ...concertPosterResolvers.Query,
     ...artistResolvers.Query,
     ...concertTicketResolvers.Query,
+    ...venueResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,
@@ -21,6 +23,7 @@ const resolvers: Resolvers = {
     ...concertTicketResolvers.Mutation,
     ...concertPosterResolvers.Mutation,
     ...artistResolvers.Mutation,
+    ...venueResolvers.Mutation,
   },
 }
 
