@@ -78,6 +78,22 @@ const venueResolvers: Resolvers = {
       const connected = await venueDTO.connect(args.input.concertId)
       return connected.serialize()
     },
+    removeConcertVenue: async (parent, args, ctx) => {
+      try {
+        await authorizeUser(ctx, { requiredRole: 'staff' })
+        const dto = new VenueDTO({
+          id: args.input.venueId,
+        })
+        const removed = await dto.delete(args.input.concertId)
+        return removed.serialize()
+      } catch (e) {
+        return {
+          __typename: 'HttpError',
+          code: 500,
+          message: (e as any).toString(),
+        }
+      }
+    },
   },
 }
 
