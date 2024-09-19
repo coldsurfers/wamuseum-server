@@ -36,9 +36,12 @@ export default class VenueDTO {
         concertId,
         venueId: this.props.id,
       },
+      include: {
+        venue: true,
+      },
     })
     return new VenueDTO({
-      id: data.venueId,
+      ...data.venue,
     })
   }
 
