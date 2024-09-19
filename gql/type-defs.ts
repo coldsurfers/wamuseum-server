@@ -169,6 +169,25 @@ const typeDefs = `#graphql
     list: [Ticket]
   }
 
+  type SearchedVenue {
+    address_name: String
+    category_group_code: String
+    category_group_name: String
+    category_name: String
+    distance: String
+    id: String
+    phone: String
+    place_name: String
+    place_url: String
+    road_address_name: String
+    x: String
+    y: String
+  }
+
+  type SearchedVenueList {
+    list: [SearchedVenue]
+  }
+
   union AuthenticateEmailAuthRequestData = EmailAuthRequest | HttpError
 
   union CreateUserData = User | HttpError
@@ -214,6 +233,8 @@ const typeDefs = `#graphql
   union CreateVenueData = Venue | HttpError
 
   union CreateConcertVenueData = Venue | HttpError
+
+  union SearchVenueData = SearchedVenueList | HttpError
 
   input ConcertListOrderBy {
     createdAt: String!
@@ -275,6 +296,9 @@ const typeDefs = `#graphql
     searchArtists(
       keyword: String!
     ): SearchArtistsData
+    searchVenue(
+      keyword: String!
+    ): SearchVenueData
   }
 
   type Mutation {
