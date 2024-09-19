@@ -14,6 +14,7 @@ const resolvers: Resolvers = {
     ...concertPosterResolvers.Query,
     ...artistResolvers.Query,
     ...concertTicketResolvers.Query,
+    ...venueResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,

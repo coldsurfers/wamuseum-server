@@ -1,9 +1,29 @@
 import ngeohash from 'ngeohash'
+import SearchVenueDTO from '../dtos/SearchVenueDTO'
 import { authorizeUser } from '../utils/authHelpers'
 import { Resolvers } from '../../gql/resolvers-types'
 import VenueDTO from '../dtos/VenueDTO'
 
 const venueResolvers: Resolvers = {
+  Query: {
+    searchVenue: async (parent, args, ctx) => {
+      await authorizeUser(ctx, { requiredRole: 'staff' })
+      const { keyword } = args
+      try {
+        const dtos = await SearchVenueDTO.search(keyword)
+        return {
+          __typename: 'SearchedVenueList',
+          list: dtos.map((dto) => dto.serialize()),
+        }
+      } catch (e) {
+        return {
+          __typename: 'HttpError',
+          code: 500,
+          message: (e as any).toString(),
+        }
+      }
+    },
+  },
   Mutation: {
     createVenue: async (parent, args, ctx) => {
       await authorizeUser(ctx, { requiredRole: 'staff' })
