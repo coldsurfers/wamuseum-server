@@ -192,6 +192,10 @@ const typeDefs = `#graphql
     list: [Venue]
   }
 
+  type ConcertVenueList {
+    list: [Venue]
+  }
+
   union AuthenticateEmailAuthRequestData = EmailAuthRequest | HttpError
 
   union CreateUserData = User | HttpError
@@ -241,6 +245,8 @@ const typeDefs = `#graphql
   union SearchVenueData = SearchedVenueList | HttpError
 
   union SearchConcertVenueData = SearchedConcertVenueList | HttpError
+
+  union ConcertVenueData = ConcertVenueList | HttpError
 
   input ConcertListOrderBy {
     createdAt: String!
@@ -299,6 +305,9 @@ const typeDefs = `#graphql
     concertTickets(
       concertId: String!
     ): ConcertTicketsData
+    concertVenues(
+      concertId: String!
+    ): ConcertVenueData
     searchArtists(
       keyword: String!
     ): SearchArtistsData

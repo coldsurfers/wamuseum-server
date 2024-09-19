@@ -54,6 +54,18 @@ export default class VenueDTO {
     return data.map((value) => new VenueDTO(value))
   }
 
+  static async find(concertId: string) {
+    const data = await prisma.concertsOnVenues.findMany({
+      where: {
+        concertId,
+      },
+      include: {
+        venue: true,
+      },
+    })
+    return data.map((value) => new VenueDTO(value.venue))
+  }
+
   serialize(): VenueResolverType {
     return {
       __typename: 'Venue',

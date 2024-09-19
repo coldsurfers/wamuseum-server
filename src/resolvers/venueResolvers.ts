@@ -40,6 +40,22 @@ const venueResolvers: Resolvers = {
         }
       }
     },
+    concertVenues: async (parent, args, ctx) => {
+      try {
+        await authorizeUser(ctx, { requiredRole: 'staff' })
+        const dtos = await VenueDTO.find(args.concertId)
+        return {
+          __typename: 'ConcertVenueList',
+          list: dtos.map((dto) => dto.serialize()),
+        }
+      } catch (e) {
+        return {
+          __typename: 'HttpError',
+          code: 500,
+          message: (e as any).toString(),
+        }
+      }
+    },
   },
   Mutation: {
     createVenue: async (parent, args, ctx) => {
