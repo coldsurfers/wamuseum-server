@@ -23,6 +23,23 @@ const venueResolvers: Resolvers = {
         }
       }
     },
+    searchConcertVenue: async (parent, args, ctx) => {
+      try {
+        await authorizeUser(ctx, { requiredRole: 'staff' })
+        const { keyword } = args
+        const dtos = await VenueDTO.search(keyword)
+        return {
+          __typename: 'SearchedConcertVenueList',
+          list: dtos.map((dto) => dto.serialize()),
+        }
+      } catch (e) {
+        return {
+          __typename: 'HttpError',
+          code: 500,
+          message: (e as any).toString(),
+        }
+      }
+    },
   },
   Mutation: {
     createVenue: async (parent, args, ctx) => {

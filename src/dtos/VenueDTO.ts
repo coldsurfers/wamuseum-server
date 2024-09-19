@@ -42,6 +42,18 @@ export default class VenueDTO {
     })
   }
 
+  static async search(keyword: string) {
+    const data = await prisma.venue.findMany({
+      where: {
+        name: {
+          contains: keyword,
+        },
+      },
+    })
+
+    return data.map((value) => new VenueDTO(value))
+  }
+
   serialize(): VenueResolverType {
     return {
       __typename: 'Venue',

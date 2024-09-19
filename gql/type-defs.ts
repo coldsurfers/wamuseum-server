@@ -188,6 +188,10 @@ const typeDefs = `#graphql
     list: [SearchedVenue]
   }
 
+  type SearchedConcertVenueList {
+    list: [Venue]
+  }
+
   union AuthenticateEmailAuthRequestData = EmailAuthRequest | HttpError
 
   union CreateUserData = User | HttpError
@@ -235,6 +239,8 @@ const typeDefs = `#graphql
   union CreateConcertVenueData = Venue | HttpError
 
   union SearchVenueData = SearchedVenueList | HttpError
+
+  union SearchConcertVenueData = SearchedConcertVenueList | HttpError
 
   input ConcertListOrderBy {
     createdAt: String!
@@ -299,6 +305,9 @@ const typeDefs = `#graphql
     searchVenue(
       keyword: String!
     ): SearchVenueData
+    searchConcertVenue(
+      keyword: String!
+    ): SearchConcertVenueData
   }
 
   type Mutation {
