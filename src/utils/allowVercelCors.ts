@@ -1,9 +1,6 @@
 import { VercelApiHandler, VercelRequest, VercelResponse } from '@vercel/node'
 
-const allowedOrigins = [
-  'https://billets-admin.coldsurf.io',
-  'http://localhost:3000',
-]
+const allowedOrigins = ['https://wamuseum.coldsurf.io', 'http://localhost:3000']
 
 const allowVercelCors =
   (fn: VercelApiHandler) => async (req: VercelRequest, res: VercelResponse) => {
