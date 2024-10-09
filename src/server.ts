@@ -6,8 +6,9 @@ import {
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { GraphqlContext } from 'gql/Context'
-import typeDefs from 'gql/type-defs'
-import resolvers from 'gql/resolvers'
+import FileUploadController from '../routes/file-upload/file-upload.controller'
+import resolvers from '../gql/resolvers'
+import typeDefs from '../gql/type-defs'
 
 export const fastify = Fastify({
   logger: process.env.NODE_ENV === 'development',
@@ -31,6 +32,16 @@ fastify.register(
           token: args.headers.authorization,
         }),
       }),
+    })
+    await instance.route({
+      url: '/presigned/artist-profile-images',
+      method: ['OPTIONS', 'GET'],
+      handler: FileUploadController.getArtistProfileImagesPresigned,
+    })
+    await instance.route({
+      url: '/presigned/poster-thumbnails',
+      method: ['OPTIONS', 'GET'],
+      handler: FileUploadController.getPosterThumbnailsPresigned,
     })
     done()
   },
